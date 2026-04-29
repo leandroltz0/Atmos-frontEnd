@@ -18,6 +18,9 @@ import * as THREE from 'three';
   styleUrls: ['./onboarding.page.scss']
 })
 export class OnboardingPage implements AfterViewInit, OnDestroy {
+
+
+
   @ViewChild('moonCanvas', { static: true })
   private readonly moonCanvasRef?: ElementRef<HTMLCanvasElement>;
 
@@ -32,7 +35,6 @@ export class OnboardingPage implements AfterViewInit, OnDestroy {
   private moon?: any;
   private moonTexture?: any;
   private animationFrameId?: number;
-  private resizeObserver!: ResizeObserver;
   private resizeHandler = () => this.updateRendererSize();
 
   constructor(private readonly ngZone: NgZone) {}
@@ -51,7 +53,6 @@ export class OnboardingPage implements AfterViewInit, OnDestroy {
     this.moon?.geometry.dispose();
     this.moon?.material.dispose();
     this.moonTexture?.dispose();
-    this.resizeObserver?.disconnect();
     this.renderer?.dispose();
   }
 
@@ -77,7 +78,7 @@ export class OnboardingPage implements AfterViewInit, OnDestroy {
     renderer.setClearColor(0x000000, 0);
 
     const textureLoader = new THREE.TextureLoader();
-    const moonTexture = textureLoader.load('assets/textures/moon-texture.jpg', () => {
+    const moonTexture = textureLoader.load('assets/textures/earth-texture.jpg', () => {
       this.updateRendererSize();
     });
     moonTexture.colorSpace = THREE.SRGBColorSpace;
@@ -107,31 +108,8 @@ export class OnboardingPage implements AfterViewInit, OnDestroy {
 
     this.updateRendererSize();
     window.addEventListener('resize', this.resizeHandler);
-    this.resizeObserver = new ResizeObserver(() => this.onResize());
-    this.resizeObserver.observe(this.moonCanvasRef?.nativeElement.parentElement!);
 
     this.ngZone.runOutsideAngular(() => this.animateMoon());
-  }
-
-  private onResize(): void {
-    const canvas = this.moonCanvasRef?.nativeElement;
-    const camera = this.camera;
-    const renderer = this.renderer;
-
-    if (!canvas || !camera || !renderer) {
-      return;
-    }
-
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-
-    if (!width || !height) {
-      return;
-    }
-
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height, false);
   }
 
   // Keeps the renderer in sync with the responsive container dimensions.
