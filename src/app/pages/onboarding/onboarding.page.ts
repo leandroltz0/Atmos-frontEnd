@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import * as THREE from 'three';
 
 @Component({
@@ -37,7 +38,10 @@ export class OnboardingPage implements AfterViewInit, OnDestroy {
   private animationFrameId?: number;
   private resizeHandler = () => this.updateRendererSize();
 
-  constructor(private readonly ngZone: NgZone) {}
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly router: Router
+  ) {}
 
   ngAfterViewInit(): void {
     this.initThreeScene();
@@ -164,5 +168,9 @@ export class OnboardingPage implements AfterViewInit, OnDestroy {
       duration: `${5 + (index % 4) * 1.2}s`,
       delay: `${(index % 5) * 0.6}s`
     }));
+  }
+
+  protected onGetStarted(): void {
+    void this.router.navigate(['/allow-location']);
   }
 }
