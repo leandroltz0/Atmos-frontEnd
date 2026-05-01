@@ -1,4 +1,3 @@
-
 // Custom Theming for Angular Material
 // For more information: https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
@@ -89,7 +88,6 @@ html {
   --color-text-secondary: #8baec8;
   --color-danger: #ef4444;
   --color-success: #10b981;
-  
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -102,6 +100,11 @@ html {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -172,7 +175,6 @@ html, body {
 .atmos-glass-button.mat-mdc-button-base .mdc-button__label {
   letter-spacing: inherit;
 }
-
 .font-display {
   font-family: 'DM Serif Display', serif;
 }
@@ -962,7 +964,6 @@ app-dashboard .hourly-scroll .cdk-virtual-scroll-content-wrapper {
     animation: none;
   }
 }
-
 app-detail {
   display: block;
 

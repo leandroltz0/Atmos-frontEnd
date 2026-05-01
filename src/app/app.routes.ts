@@ -15,6 +15,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/allow-location/allow-location.page').then(m => m.AllowLocationPage)
   },
   {
+    path: 'home',
+    redirectTo: 'dashboard'
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+  },
+  {
     path: '**',
     redirectTo: 'onboarding'
   }
