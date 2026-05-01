@@ -3,15 +3,13 @@
 @use '@angular/material' as mat;
 
 html {
-  @include mat.theme((
-    color: (
-      theme-type: light,
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-    ),
-    typography: Inter,
-    density: 0,
-  ));
+  @include mat.theme((color: (theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Inter,
+      density: 0,
+    ));
 }
 
 /* You can add global styles to this file, and also import other style files */
@@ -124,7 +122,8 @@ app-root {
   min-height: 100dvh;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -175,6 +174,7 @@ html, body {
 .atmos-glass-button.mat-mdc-button-base .mdc-button__label {
   letter-spacing: inherit;
 }
+
 .font-display {
   font-family: 'DM Serif Display', serif;
 }
@@ -199,6 +199,7 @@ html, body {
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 0.6;
@@ -851,6 +852,7 @@ app-dashboard .hourly-scroll .cdk-virtual-scroll-content-wrapper {
 }
 
 @keyframes pulse-dot {
+
   0%,
   100% {
     opacity: 1;
@@ -959,11 +961,13 @@ app-dashboard .hourly-scroll .cdk-virtual-scroll-content-wrapper {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .live-dot,
   .refresh-btn.spinning .refresh-icon {
     animation: none;
   }
 }
+
 app-detail {
   display: block;
 
@@ -1452,11 +1456,25 @@ app-detail {
     border-radius: 999px;
   }
 
-  .uv-legend__dot--low { background: #10B981; }
-  .uv-legend__dot--moderate { background: #FFD166; }
-  .uv-legend__dot--high { background: #F97316; }
-  .uv-legend__dot--very-high { background: #EF4444; }
-  .uv-legend__dot--extreme { background: #7C3AED; }
+  .uv-legend__dot--low {
+    background: #10B981;
+  }
+
+  .uv-legend__dot--moderate {
+    background: #FFD166;
+  }
+
+  .uv-legend__dot--high {
+    background: #F97316;
+  }
+
+  .uv-legend__dot--very-high {
+    background: #EF4444;
+  }
+
+  .uv-legend__dot--extreme {
+    background: #7C3AED;
+  }
 
   .week-list-shell {
     padding: 1rem 0 0.55rem;
@@ -1485,13 +1503,11 @@ app-detail {
   .week-divider {
     height: 1px;
     margin: 0 1.1rem;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.06) 20%,
-      rgba(255, 255, 255, 0.06) 80%,
-      transparent
-    );
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.06) 20%,
+        rgba(255, 255, 255, 0.06) 80%,
+        transparent);
   }
 
   .weekly-row__main {
