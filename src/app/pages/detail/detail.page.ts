@@ -151,6 +151,8 @@ export class DetailPage implements AfterViewInit, OnDestroy {
   protected readonly weather = signal<DetailWeather>({ ...MOCK_DETAIL });
   protected readonly activeTab = signal(0);
   protected readonly hoveredHourIndex = signal<number | null>(null);
+  protected readonly hoveredPrecipHourIndex = signal<number | null>(null);
+  protected readonly hoveredUvHourIndex = signal<number | null>(null);
 
   protected readonly tempChartPoints = computed<ChartPoint[]>(() => {
     const items = this.weather().hourly;
@@ -188,6 +190,7 @@ export class DetailPage implements AfterViewInit, OnDestroy {
   });
 
   protected readonly xAxisLabels = computed(() => this.tempChartPoints().filter((point) => point.index % 3 === 0));
+  protected readonly hourlyTickItems = computed(() => this.weather().hourly.filter((_item, index) => index % 3 === 0));
   protected readonly observedHourIndex = computed(() => {
     const index = this.weather().hourly.findIndex((item) => item.hour === this.weather().observedAt);
     return index >= 0 ? index : 0;
@@ -212,6 +215,44 @@ export class DetailPage implements AfterViewInit, OnDestroy {
       left: clamp((point.x / TEMP_CHART_WIDTH) * 100, 12, 88),
       top: clamp((point.y / TEMP_CHART_HEIGHT) * 100, 22, 84)
     };
+  });
+  protected readonly temperatureTooltipPlacement = computed(() => {
+    const point = this.activeTooltipPoint();
+    if (!point) {
+      return 'above';
+    }
+
+    return point.y < 72 ? 'below' : 'above';
+  });
+  protected readonly maxPrecipChance = computed(() =>
+    Math.max(...this.weather().hourly.map((item) => item.precipChance), 0)
+  );
+  protected readonly hasPrecipitation = computed(() =>
+    this.weather().hourly.some((item) => item.precipChance > 0)
+  );
+  protected readonly activePrecipTooltipHour = computed(() => {
+    const index = this.hoveredPrecipHourIndex();
+    return index !== null ? this.weather().hourly[index] : null;
+  });
+  protected readonly activePrecipTooltipPosition = computed(() => {
+    const index = this.hoveredPrecipHourIndex();
+    if (index === null) {
+      return 0;
+    }
+
+    return clamp((index / Math.max(this.weather().hourly.length - 1, 1)) * 100, 8, 92);
+  });
+  protected readonly activeUvTooltipHour = computed(() => {
+    const index = this.hoveredUvHourIndex();
+    return index !== null ? this.weather().hourly[index] : null;
+  });
+  protected readonly activeUvTooltipPosition = computed(() => {
+    const index = this.hoveredUvHourIndex();
+    if (index === null) {
+      return 0;
+    }
+
+    return clamp((index / Math.max(this.weather().hourly.length - 1, 1)) * 100, 8, 92);
   });
 
   protected readonly pollutantRows = computed<PollutantRow[]>(() => {
@@ -344,6 +385,8 @@ export class DetailPage implements AfterViewInit, OnDestroy {
   protected onTabChange(index: number): void {
     this.activeTab.set(index);
     this.hoveredHourIndex.set(null);
+    this.hoveredPrecipHourIndex.set(null);
+    this.hoveredUvHourIndex.set(null);
     window.setTimeout(() => this.runTabAnimations(index), 40);
   }
 
@@ -353,6 +396,22 @@ export class DetailPage implements AfterViewInit, OnDestroy {
 
   protected onHideTooltip(): void {
     this.hoveredHourIndex.set(null);
+  }
+
+  protected onShowPrecipTooltip(index: number): void {
+    this.hoveredPrecipHourIndex.set(index);
+  }
+
+  protected onHidePrecipTooltip(): void {
+    this.hoveredPrecipHourIndex.set(null);
+  }
+
+  protected onShowUvTooltip(index: number): void {
+    this.hoveredUvHourIndex.set(index);
+  }
+
+  protected onHideUvTooltip(): void {
+    this.hoveredUvHourIndex.set(null);
   }
 
   protected onGoBack(): void {
@@ -381,11 +440,28 @@ export class DetailPage implements AfterViewInit, OnDestroy {
   }
 
   protected getPrecipBarHeight(item: HourlyDetail): number {
-    return clamp(item.precipChance, 0, 100);
+    const max = this.maxPrecipChance();
+    if (item.precipChance <= 0 || max <= 0) {
+      return 0;
+    }
+
+    return (item.precipChance / max) * 100;
+  }
+
+  protected getPrecipBarOpacity(item: HourlyDetail): number {
+    if (item.precipChance <= 0) {
+      return 0;
+    }
+
+    return 0.4 + (item.precipChance / 100) * 0.6;
   }
 
   protected getUvBarHeight(item: HourlyDetail): number {
-    return clamp((item.uvIndex / 11) * 100, 8, 100);
+    if (item.uvIndex <= 0) {
+      return 0;
+    }
+
+    return Math.max((item.uvIndex / 11) * 100, 10);
   }
 
   protected getUvColor(value: number): string {
@@ -430,6 +506,26 @@ export class DetailPage implements AfterViewInit, OnDestroy {
     return this.weather().visibility >= segment * 4;
   }
 
+  protected getUvLevelLabel(value: number): string {
+    if (value <= 2) {
+      return 'Bajo';
+    }
+
+    if (value <= 5) {
+      return 'Moderado';
+    }
+
+    if (value <= 7) {
+      return 'Alto';
+    }
+
+    if (value <= 10) {
+      return 'Muy alto';
+    }
+
+    return 'Extremo';
+  }
+
   protected trackByHour(_index: number, item: HourlyDetail): string {
     return item.hour;
   }
@@ -471,7 +567,7 @@ export class DetailPage implements AfterViewInit, OnDestroy {
 
       if (index === 0) {
         this.animateTemperatureLine(panel);
-        gsap.from(panel.querySelectorAll('.precip-bar__fill'), {
+        gsap.from(panel.querySelectorAll('.compact-bar__fill--precip'), {
           scaleY: 0,
           transformOrigin: 'bottom center',
           opacity: 0,
@@ -480,7 +576,7 @@ export class DetailPage implements AfterViewInit, OnDestroy {
           stagger: 0.02,
           delay: 0.2
         });
-        gsap.from(panel.querySelectorAll('.uv-column__fill'), {
+        gsap.from(panel.querySelectorAll('.compact-bar__fill--uv'), {
           scaleY: 0,
           transformOrigin: 'bottom center',
           opacity: 0,
