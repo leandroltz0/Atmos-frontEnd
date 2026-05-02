@@ -1,0 +1,129 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.sun-timeline {
+  --bg-base: #0d1b2a;
+  --bg-surface: #112236;
+  --bg-card: #1b3a5c;
+  --color-accent: #3a86ff;
+  --color-info: #48cae4;
+  --color-sun: #ffd166;
+  --text-primary: #ffffff;
+  --text-muted: #8baec8;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  display: grid;
+  gap: 18px;
+  width: 100%;
+}
+
+.sun-timeline__arc {
+  width: 100%;
+  padding: 6px 0 0;
+}
+
+.sun-timeline__arc svg {
+  display: block;
+  width: 100%;
+  height: 140px;
+  overflow: visible;
+}
+
+.sun-timeline__baseline {
+  stroke: rgba(139, 174, 200, 0.15);
+  stroke-dasharray: 4 6;
+}
+
+.sun-timeline__path {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.sun-timeline__noon {
+  fill: var(--text-muted);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.sun-timeline__marker {
+  fill: var(--color-sun);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sun-timeline__time {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.sun-timeline__sun circle {
+  fill: var(--color-sun);
+  filter: drop-shadow(0 0 8px rgba(255, 209, 102, 0.8));
+}
+
+.sun-timeline__stats {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  gap: 12px;
+  width: 100%;
+  padding-top: 4px;
+}
+
+.sun-timeline__stat {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+
+.sun-timeline__stat-label {
+  color: var(--text-muted);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sun-timeline__stat-value {
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.sun-timeline__stat-value--sun {
+  color: var(--color-sun);
+  font-size: 18px;
+}
+
+.sun-timeline__stat-value--duration {
+  font-size: 16px;
+}
+
+@media (max-width: 420px) {
+  .sun-timeline__stats {
+    gap: 8px;
+  }
+
+  .sun-timeline__stat-value--sun {
+    font-size: 16px;
+  }
+
+  .sun-timeline__stat-value--duration {
+    font-size: 14px;
+  }
+}

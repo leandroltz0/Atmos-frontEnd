@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
-type UvLevel = 'low' | 'moderate' | 'high' | 'extreme';
+export type UvLevel = 'low' | 'moderate' | 'high' | 'very-high' | 'extreme';
 
 @Component({
   selector: 'app-uv-badge',
@@ -18,6 +18,8 @@ export class UvBadgeComponent {
         return 'Moderado';
       case 'high':
         return 'Alto';
+      case 'very-high':
+        return 'Muy alto';
       case 'extreme':
         return 'Extremo';
       case 'low':
@@ -29,28 +31,32 @@ export class UvBadgeComponent {
   protected get backgroundColor(): string {
     switch (this.level) {
       case 'moderate':
-        return '#FACC1533';
+        return '#FFD16633';
       case 'high':
-        return '#FB923C33';
+        return '#F9731633';
+      case 'very-high':
+        return '#EF444433';
       case 'extreme':
-        return '#F8717133';
+        return '#9333EA33';
       case 'low':
       default:
-        return '#4ADE8033';
+        return '#10B98133';
     }
   }
 
   protected get textColor(): string {
     switch (this.level) {
       case 'moderate':
-        return '#FACC15';
+        return '#FFD166';
       case 'high':
-        return '#FB923C';
+        return '#F97316';
+      case 'very-high':
+        return '#EF4444';
       case 'extreme':
-        return '#F87171';
+        return '#9333EA';
       case 'low':
       default:
-        return '#4ADE80';
+        return '#10B981';
     }
   }
 }

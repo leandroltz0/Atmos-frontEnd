@@ -6,6 +6,7 @@ import { RainBarsChartComponent } from '../../shared/components/rain-bars-chart'
 import { SectionCardComponent } from '../../shared/components/section-card';
 import { StatCellComponent } from '../../shared/components/stat-cell';
 import { UvBadgeComponent } from '../../shared/components/uv-badge';
+import { UvTimelineComponent } from '../../shared/components/uv-timeline';
 import { WeatherTabsComponent } from '../../shared/components/weather-tabs';
 import { WindRoseComponent } from '../../shared/components/wind-rose';
 
@@ -17,6 +18,7 @@ import { WindRoseComponent } from '../../shared/components/wind-rose';
     SectionCardComponent,
     WeatherTabsComponent,
     UvBadgeComponent,
+    UvTimelineComponent,
     AqiDotComponent,
     StatCellComponent,
     RainBarsChartComponent,

@@ -1,0 +1,67 @@
+<app-section-card title="SOL">
+  <section class="sun-timeline" aria-label="Cronología solar del día">
+    <div class="sun-timeline__arc" aria-hidden="true">
+      <svg viewBox="0 0 400 140" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient [attr.id]="arcGradientId" x1="40" y1="65" x2="360" y2="65" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(255, 209, 102, 0.2)" />
+            <stop offset="50%" stop-color="var(--color-sun)" />
+            <stop offset="100%" stop-color="rgba(255, 209, 102, 0.2)" />
+          </linearGradient>
+
+          <linearGradient [attr.id]="areaGradientId" x1="200" y1="10" x2="200" y2="120" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(255, 209, 102, 0.08)" />
+            <stop offset="100%" stop-color="rgba(255, 209, 102, 0)" />
+          </linearGradient>
+        </defs>
+
+        <line class="sun-timeline__baseline" x1="0" y1="120" x2="400" y2="120" />
+        <path class="sun-timeline__area" [attr.fill]="'url(#' + areaGradientId + ')'" d="M 40,120 Q 200,10 360,120 L 360,120 L 40,120 Z" />
+        <path class="sun-timeline__path" [attr.stroke]="'url(#' + arcGradientId + ')'" d="M 40,120 Q 200,10 360,120" />
+
+        <text class="sun-timeline__noon" x="200" y="18" text-anchor="middle">
+          {{ solarNoon }}
+        </text>
+
+        <g class="sun-timeline__marker sun-timeline__marker--start">
+          <text x="40" y="111" text-anchor="middle">↑</text>
+          <text class="sun-timeline__time" x="40" y="136" text-anchor="middle">
+            {{ sunrise }}
+          </text>
+        </g>
+
+        <g class="sun-timeline__marker sun-timeline__marker--end">
+          <text x="360" y="111" text-anchor="middle">↓</text>
+          <text class="sun-timeline__time" x="360" y="136" text-anchor="middle">
+            {{ sunset }}
+          </text>
+        </g>
+
+        <g class="sun-timeline__sun" [attr.opacity]="sunPosition.opacity">
+          <circle
+            [attr.cx]="sunPosition.x"
+            [attr.cy]="sunPosition.y"
+            r="8"
+          />
+        </g>
+      </svg>
+    </div>
+
+    <div class="sun-timeline__stats">
+      <article class="sun-timeline__stat">
+        <span class="sun-timeline__stat-label">AMANECER</span>
+        <span class="sun-timeline__stat-value sun-timeline__stat-value--sun">{{ sunrise }}</span>
+      </article>
+
+      <article class="sun-timeline__stat">
+        <span class="sun-timeline__stat-label">DURACIÓN</span>
+        <span class="sun-timeline__stat-value sun-timeline__stat-value--duration">{{ daylightLabel }}</span>
+      </article>
+
+      <article class="sun-timeline__stat">
+        <span class="sun-timeline__stat-label">ATARDECER</span>
+        <span class="sun-timeline__stat-value sun-timeline__stat-value--sun">{{ sunset }}</span>
+      </article>
+    </div>
+  </section>
+</app-section-card>

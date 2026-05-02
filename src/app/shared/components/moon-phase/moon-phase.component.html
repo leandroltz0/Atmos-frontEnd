@@ -1,0 +1,61 @@
+<app-section-card title="FASE LUNAR">
+  <div class="moon-phase">
+    <div class="moon-phase__graphic">
+      <div class="moon-phase__halo"></div>
+
+      <svg
+        class="moon-phase__svg"
+        viewBox="0 0 120 120"
+        role="img"
+        [attr.aria-label]="'Fase lunar: ' + phaseName"
+      >
+        @for (star of stars; track star.cx + '-' + star.cy) {
+          <circle
+            class="moon-phase__star"
+            [attr.cx]="star.cx"
+            [attr.cy]="star.cy"
+            [attr.r]="star.r"
+            [attr.opacity]="star.opacity"
+          />
+        }
+
+        <circle
+          class="moon-phase__moon"
+          [attr.cx]="moonCenter"
+          [attr.cy]="moonCenter"
+          [attr.r]="moonRadius"
+        />
+
+        <circle
+          class="moon-phase__shadow"
+          [attr.cx]="overlayCx"
+          [attr.cy]="moonCenter"
+          [attr.r]="moonRadius"
+          [attr.opacity]="overlayOpacity"
+        />
+      </svg>
+    </div>
+
+    <div class="moon-phase__stats">
+      <div class="moon-phase__stat">
+        <span class="moon-phase__label">Fase</span>
+        <div class="moon-phase__value moon-phase__value--phase">{{ phaseName }}</div>
+      </div>
+
+      <div class="moon-phase__stat">
+        <span class="moon-phase__label">Iluminación</span>
+        <div class="moon-phase__value moon-phase__value--illumination">{{ illuminationLabel }}</div>
+      </div>
+
+      <div class="moon-phase__stat">
+        <span class="moon-phase__label">Salida</span>
+        <div class="moon-phase__value moon-phase__value--time">{{ moonrise }}</div>
+      </div>
+
+      <div class="moon-phase__stat">
+        <span class="moon-phase__label">Ocaso</span>
+        <div class="moon-phase__value moon-phase__value--time">{{ moonset }}</div>
+      </div>
+    </div>
+  </div>
+</app-section-card>

@@ -1,0 +1,30 @@
+<app-section-card title="ÍNDICE UV">
+  <div class="uv-timeline">
+    <div class="uv-timeline__viewport">
+      <div
+        class="uv-timeline__grid"
+        [style.grid-template-columns]="gridTemplateColumns"
+        [style.min-width.px]="gridMinWidth"
+      >
+        @for (point of points; track point.hour; let index = $index) {
+          <article
+            class="uv-timeline__item"
+            [style.border-top-color]="point.isPeak ? point.textColor : 'transparent'"
+          >
+            <span class="uv-timeline__hour">{{ getHourLabel(index, point.hour) }}</span>
+
+            <span
+              class="uv-timeline__badge"
+              [style.background-color]="point.backgroundColor"
+              [style.color]="point.textColor"
+            >
+              {{ point.label }}
+            </span>
+
+            <span class="uv-timeline__value">{{ point.uvIndex }}</span>
+          </article>
+        }
+      </div>
+    </div>
+  </div>
+</app-section-card>

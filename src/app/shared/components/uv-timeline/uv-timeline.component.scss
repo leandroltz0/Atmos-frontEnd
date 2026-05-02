@@ -1,0 +1,85 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.uv-timeline {
+  --bg-base: #0d1b2a;
+  --bg-surface: #112236;
+  --bg-card: #1b3a5c;
+  --color-accent: #3a86ff;
+  --color-info: #48cae4;
+  --color-sun: #ffd166;
+  --text-primary: #ffffff;
+  --text-muted: #8baec8;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  width: 100%;
+}
+
+.uv-timeline__viewport {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.uv-timeline__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.uv-timeline__grid {
+  display: grid;
+  width: 100%;
+  gap: 0;
+}
+
+.uv-timeline__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  border-top: 2px solid transparent;
+}
+
+.uv-timeline__hour {
+  display: block;
+  width: 100%;
+  height: 16px;
+  color: var(--text-muted);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.uv-timeline__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  min-width: 0;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.uv-timeline__value {
+  display: block;
+  width: 100%;
+  height: 18px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+}
