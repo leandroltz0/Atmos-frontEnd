@@ -1,0 +1,66 @@
+<app-section-card title="PRECIPITACIÓN">
+  <div #chartContainer class="rain-bars-chart">
+    <svg
+      class="rain-bars-chart__svg"
+      width="100%"
+      [attr.height]="svgHeight"
+      [attr.viewBox]="'0 0 ' + containerWidth + ' ' + svgHeight"
+      role="img"
+      aria-label="Grafica de probabilidad de precipitacion por hora"
+    >
+      <defs>
+        <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#48CAE4" />
+          <stop offset="100%" stop-color="#3A86FF" stop-opacity="0.8" />
+        </linearGradient>
+      </defs>
+
+      <line
+        class="rain-bars-chart__baseline"
+        [attr.x1]="16"
+        [attr.x2]="containerWidth - 16"
+        [attr.y1]="baselineY"
+        [attr.y2]="baselineY"
+      />
+
+      @for (bar of bars; track bar.hour) {
+        <g class="rain-bars-chart__group">
+          @if (bar.probability >= 20) {
+            <text
+              class="rain-bars-chart__probability"
+              [attr.x]="bar.x + bar.width / 2"
+              [attr.y]="bar.y - 8"
+              text-anchor="middle"
+            >
+              {{ bar.probability }}%
+            </text>
+          }
+
+          <rect
+            class="rain-bars-chart__bar"
+            [attr.x]="bar.x"
+            [attr.y]="bar.y"
+            [attr.width]="bar.width"
+            [attr.height]="bar.height"
+            [attr.rx]="barRadius"
+            [attr.ry]="barRadius"
+            [attr.fill]="'url(#' + gradientId + ')'"
+            [attr.opacity]="bar.opacity"
+            [class.rain-bars-chart__bar--peak]="bar.isPeak"
+          />
+
+          @if (bar.showHourLabel) {
+            <text
+              class="rain-bars-chart__hour"
+              [attr.x]="bar.x + bar.width / 2"
+              [attr.y]="baselineY + 16"
+              text-anchor="middle"
+            >
+              {{ bar.hour }}
+            </text>
+          }
+        </g>
+      }
+    </svg>
+  </div>
+</app-section-card>

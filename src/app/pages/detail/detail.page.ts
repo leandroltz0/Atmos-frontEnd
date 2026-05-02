@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { AqiDotComponent } from '../../shared/components/aqi-dot';
+import { RainBarsChartComponent } from '../../shared/components/rain-bars-chart';
 import { SectionCardComponent } from '../../shared/components/section-card';
 import { StatCellComponent } from '../../shared/components/stat-cell';
 import { UvBadgeComponent } from '../../shared/components/uv-badge';
@@ -10,7 +11,15 @@ import { WeatherTabsComponent } from '../../shared/components/weather-tabs';
 @Component({
   selector: 'app-detail-page',
   standalone: true,
-  imports: [CommonModule, SectionCardComponent, WeatherTabsComponent, UvBadgeComponent, AqiDotComponent, StatCellComponent],
+  imports: [
+    CommonModule,
+    SectionCardComponent,
+    WeatherTabsComponent,
+    UvBadgeComponent,
+    AqiDotComponent,
+    StatCellComponent,
+    RainBarsChartComponent
+  ],
   templateUrl: './detail.page.html',
   styleUrl: './detail.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
