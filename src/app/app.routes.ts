@@ -3,24 +3,24 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'onboarding',
-    pathMatch: 'full'
-  },
-  {
-    path: 'onboarding',
-    loadComponent: () => import('./pages/onboarding/onboarding.page').then(m => m.OnboardingPage)
+    pathMatch: 'full',
+    redirectTo: 'onboarding'
   },
   {
     path: 'allow-location',
-    loadComponent: () => import('./pages/allow-location/allow-location.page').then(m => m.AllowLocationPage)
+    loadComponent: () => import('./pages/allow-location/allow-location.page').then((m) => m.AllowLocationPage)
   },
   {
     path: 'home',
-    redirectTo: 'dashboard'
+    loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent)
   },
   {
     path: 'dashboard',
-    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent)
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('./pages/onboarding/onboarding.page').then((m) => m.OnboardingPage)
   },
   {
     path: '**',

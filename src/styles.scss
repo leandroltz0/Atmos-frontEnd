@@ -1,15 +1,18 @@
+
 // Custom Theming for Angular Material
 // For more information: https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
 html {
-  @include mat.theme((color: (theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Inter,
-      density: 0,
-    ));
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Inter,
+    density: 0,
+  ));
 }
 
 /* You can add global styles to this file, and also import other style files */
@@ -86,6 +89,7 @@ html {
   --color-text-secondary: #8baec8;
   --color-danger: #ef4444;
   --color-success: #10b981;
+  
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -98,11 +102,6 @@ html {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-html,
-body {
-  height: 100%;
 }
 
 body {
@@ -122,8 +121,7 @@ app-root {
   min-height: 100dvh;
 }
 
-html,
-body {
+html, body {
   height: 100%;
 }
 
@@ -199,7 +197,6 @@ body {
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 0.6;
@@ -852,7 +849,6 @@ app-dashboard .hourly-scroll .cdk-virtual-scroll-content-wrapper {
 }
 
 @keyframes pulse-dot {
-
   0%,
   100% {
     opacity: 1;
@@ -961,7 +957,6 @@ app-dashboard .hourly-scroll .cdk-virtual-scroll-content-wrapper {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .live-dot,
   .refresh-btn.spinning .refresh-icon {
     animation: none;
@@ -1456,61 +1451,26 @@ app-detail {
     border-radius: 999px;
   }
 
-  .uv-legend__dot--low {
-    background: #10B981;
-  }
-
-  .uv-legend__dot--moderate {
-    background: #FFD166;
-  }
-
-  .uv-legend__dot--high {
-    background: #F97316;
-  }
-
-  .uv-legend__dot--very-high {
-    background: #EF4444;
-  }
-
-  .uv-legend__dot--extreme {
-    background: #7C3AED;
-  }
-
-  .week-list-shell {
-    padding: 1rem 0 0.55rem;
-  }
+  .uv-legend__dot--low { background: #10B981; }
+  .uv-legend__dot--moderate { background: #FFD166; }
+  .uv-legend__dot--high { background: #F97316; }
+  .uv-legend__dot--very-high { background: #EF4444; }
+  .uv-legend__dot--extreme { background: #7C3AED; }
 
   .weekly-list {
     display: flex;
     flex-direction: column;
-    margin-top: 0.65rem;
+    gap: 0.75rem;
   }
 
   .weekly-row {
-    padding: 0.875rem 1.1rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 180ms ease;
+    gap: 0.8rem;
   }
 
-  .weekly-row:hover {
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  .week-divider {
-    height: 1px;
-    margin: 0 1.1rem;
-    background: linear-gradient(90deg,
-        transparent,
-        rgba(255, 255, 255, 0.06) 20%,
-        rgba(255, 255, 255, 0.06) 80%,
-        transparent);
-  }
-
-  .weekly-row__main {
+  .weekly-row__headline {
     display: grid;
     grid-template-columns: auto auto auto minmax(0, 1fr);
     align-items: center;
@@ -1569,28 +1529,19 @@ app-detail {
     flex: 1;
     min-width: 100px;
     height: 4px;
-    overflow: hidden;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.08);
   }
 
   .weekly-row__range-fill {
-    position: absolute;
-    top: 0;
     height: 100%;
     border-radius: 999px;
     background: linear-gradient(90deg, #48cae4, #3a86ff);
-    transition:
-      left 0.6s ease,
-      width 0.6s ease;
   }
 
   .weekly-row__wind {
-    gap: 4px;
-    padding-left: 0;
-    font-size: 11px;
+    font-size: 0.82rem;
     color: var(--color-text-secondary);
-    font-family: 'JetBrains Mono', monospace;
   }
 
   .detail-grid {
@@ -1927,7 +1878,7 @@ app-detail {
       padding: 0.5rem 0.65rem;
     }
 
-    .weekly-row__main {
+    .weekly-row__headline {
       grid-template-columns: minmax(0, 1fr);
       align-items: flex-start;
     }
@@ -1979,6 +1930,7 @@ app-detail {
     }
 
     .detail-card:hover,
+    .weekly-row:hover,
     .detail-mini-card:hover {
       transform: translateY(-2px);
       border-color: rgba(58, 134, 255, 0.2);

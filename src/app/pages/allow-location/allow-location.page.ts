@@ -159,12 +159,12 @@ export class AllowLocationPage implements AfterViewInit, OnDestroy {
       y: -20,
       duration: 0.4,
       ease: 'power2.in',
-      onComplete: () => void this.router.navigate(['/dashboard'])
+      onComplete: () => void this.router.navigate(['/home'])
     });
   }
 
   private navigateHomeAfterDelay(): void {
-    window.setTimeout(() => void this.router.navigate(['/dashboard']), HOME_NAVIGATION_DELAY_MS);
+    window.setTimeout(() => void this.router.navigate(['/home']), HOME_NAVIGATION_DELAY_MS);
   }
 
   private playGrantedButtonAnimation(): void {
