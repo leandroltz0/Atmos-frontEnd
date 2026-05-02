@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.weather-tabs__panel {
+  padding-top: 16px;
+}
+
+.weather-tabs__panel p {
+  margin: 0;
+  color: #d9ecfa;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+:host ::ng-deep .weather-tabs .mat-mdc-tab-header {
+  padding-top: 8px;
+  padding-bottom: 0;
+  background: transparent !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .weather-tabs .mat-mdc-tab-header-pagination {
+  display: none !important;
+}
+
+:host ::ng-deep .weather-tabs .mat-mdc-tab-label-container {
+  background: transparent !important;
+}
+
+:host ::ng-deep .weather-tabs .mdc-tab {
+  min-width: 0;
+  padding: 0 16px;
+}
+
+:host ::ng-deep .weather-tabs .mdc-tab__text-label {
+  color: #8baec8 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+}
+
+:host ::ng-deep .weather-tabs .mdc-tab--active .mdc-tab__text-label {
+  color: #ffffff !important;
+}
+
+:host ::ng-deep .weather-tabs .mdc-tab-indicator__content--underline {
+  border-color: #3a86ff !important;
+  border-width: 2px !important;
+}
+
+:host ::ng-deep .weather-tabs .mat-mdc-tab-ripple,
+:host ::ng-deep .weather-tabs .mat-ripple-element {
+  display: none !important;
+}

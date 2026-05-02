@@ -8,6 +8,10 @@ export const routes: Routes = [
     redirectTo: DEFAULT_APP_ROUTE
   },
   {
+    path: APP_ROUTE_PATHS.detail,
+    loadComponent: () => import('./pages/detail/detail.page').then((m) => m.DetailPage)
+  },
+  {
     path: APP_ROUTE_PATHS.allowLocation,
     loadComponent: () => import('./pages/allow-location/allow-location.page').then((m) => m.AllowLocationPage)
   },

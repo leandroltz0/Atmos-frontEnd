@@ -1,0 +1,21 @@
+.section-card {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 20px;
+  border-radius: 20px;
+  background: #1b3a5c;
+}
+
+.section-card__title {
+  margin: 0 0 16px;
+  color: #8baec8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.section-card__content {
+  width: 100%;
+}

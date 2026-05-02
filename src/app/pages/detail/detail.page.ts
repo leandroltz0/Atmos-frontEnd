@@ -1,0 +1,28 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { SectionCardComponent } from '../../shared/components/section-card';
+import { WeatherTabsComponent } from '../../shared/components/weather-tabs';
+
+@Component({
+  selector: 'app-detail-page',
+  standalone: true,
+  imports: [CommonModule, SectionCardComponent, WeatherTabsComponent],
+  templateUrl: './detail.page.html',
+  styleUrl: './detail.page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class DetailPage {
+  protected readonly highlights = [
+    { label: 'Sensacion termica', value: '29°' },
+    { label: 'Humedad', value: '64%' },
+    { label: 'Viento', value: '18 km/h' }
+  ];
+
+  protected readonly hourlyForecast = [
+    { hour: '14:00', temp: '27°', state: 'Parcialmente nublado' },
+    { hour: '15:00', temp: '28°', state: 'Brisa suave' },
+    { hour: '16:00', temp: '26°', state: 'Prob. de lluvia 20%' },
+    { hour: '17:00', temp: '24°', state: 'Cielo cubierto' }
+  ];
+}
