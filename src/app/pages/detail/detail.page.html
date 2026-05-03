@@ -15,12 +15,19 @@
       <app-weather-tabs />
     </div>
 
-    <app-sun-timeline />
-    <app-moon-phase />
     <app-temperature-chart />
-    <app-uv-timeline />
     <app-rain-bars-chart />
     <app-wind-rose />
+    <app-uv-timeline />
+    <app-aqi-panel
+      [aqi]="airQuality.aqi"
+      [pm25]="airQuality.pm25"
+      [pm10]="airQuality.pm10"
+      [o3]="airQuality.o3"
+      [no2]="airQuality.no2"
+    />
+    <app-sun-timeline />
+    <app-moon-phase />
 
     <app-section-card title="Overview">
       <div class="metrics-grid">
@@ -64,13 +71,5 @@
         </div>
       </div>
     </app-section-card>
-
-    <app-aqi-panel
-      [aqi]="airQuality.aqi"
-      [pm25]="airQuality.pm25"
-      [pm10]="airQuality.pm10"
-      [o3]="airQuality.o3"
-      [no2]="airQuality.no2"
-    />
   </section>
 </main>
