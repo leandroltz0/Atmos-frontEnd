@@ -1,0 +1,124 @@
+:host {
+  display: block;
+}
+
+.hourly-chart {
+  padding: 16px;
+  border: 1px solid rgba(137, 177, 215, 0.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(41, 83, 126, 0.24), transparent 44%),
+    #1b3a5c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 32px rgba(3, 10, 22, 0.18);
+}
+
+.hourly-chart__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.hourly-chart__title,
+.hourly-chart__empty,
+.hourly-chart__hour,
+.hourly-chart__temp {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.hourly-chart__title {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hourly-chart__scroll {
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(58, 134, 255, 0.62) transparent;
+}
+
+.hourly-chart__scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.hourly-chart__scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(58, 134, 255, 0.62);
+}
+
+.hourly-chart__track {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  min-width: max-content;
+}
+
+.hourly-chart__item {
+  display: flex;
+  flex: 0 0 52px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.hourly-chart__hour {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.73rem;
+  font-weight: 600;
+}
+
+.hourly-chart__bar-shell {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 128px;
+  padding: 8px 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(8, 21, 36, 0.34));
+}
+
+.hourly-chart__bar {
+  width: 18px;
+  min-height: 16px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #62a7ff 0%, #3a86ff 100%);
+  box-shadow: 0 6px 18px rgba(58, 134, 255, 0.28);
+}
+
+.hourly-chart__temp {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.hourly-chart__empty {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .hourly-chart {
+    padding: 18px 20px 20px;
+    border-radius: 24px;
+  }
+
+  .hourly-chart__track {
+    gap: 16px;
+  }
+
+  .hourly-chart__item {
+    flex-basis: 56px;
+  }
+
+  .hourly-chart__bar-shell {
+    height: 140px;
+  }
+}

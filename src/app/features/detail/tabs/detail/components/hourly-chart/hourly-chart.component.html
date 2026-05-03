@@ -1,0 +1,23 @@
+<section class="hourly-chart" aria-labelledby="hourly-chart-title">
+  <div class="hourly-chart__header">
+    <h3 id="hourly-chart-title" class="hourly-chart__title">Hourly Temperature</h3>
+  </div>
+
+  @if (hasData) {
+    <div class="hourly-chart__scroll" aria-label="24-hour temperature chart">
+      <div class="hourly-chart__track">
+        @for (item of chartData; track item.hour) {
+          <div class="hourly-chart__item">
+            <span class="hourly-chart__hour">{{ item.hour }}</span>
+            <div class="hourly-chart__bar-shell" aria-hidden="true">
+              <div class="hourly-chart__bar" [style.height.%]="getBarHeight(item.temp)"></div>
+            </div>
+            <span class="hourly-chart__temp">{{ item.temp }}&deg;</span>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <p class="hourly-chart__empty">No hourly temperature data available.</p>
+  }
+</section>

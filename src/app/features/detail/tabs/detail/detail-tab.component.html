@@ -3,19 +3,43 @@
     <p class="detail-tab__eyebrow">Detalle</p>
     <h2 class="detail-tab__title">Weather breakdown</h2>
     <p class="detail-tab__intro">
-      Aca van a vivir los modulos con el detalle fino del clima para esta ubicacion.
+      Aca vive la lectura profunda del dia: tendencia horaria, lluvia, viento, radiacion,
+      calidad del aire y condiciones atmosfericas.
     </p>
   </header>
 
-  <div class="detail-tab__sections">
-    @for (section of sections; track section.title) {
-      <article class="section">
-        <div class="section__glow" aria-hidden="true"></div>
-        <div class="section__content">
-          <h3 class="section__title">{{ section.title }}</h3>
-          <p class="section__description">{{ section.description }}</p>
+  <div class="detail-tab__lead">
+    <app-hourly-chart [hourlyData]="hourlyData" />
+  </div>
+
+  <div class="detail-tab__modules">
+    <app-rain-bars-chart />
+
+    <div class="detail-tab__pair">
+      <app-wind-rose />
+      <app-sun-timeline />
+    </div>
+
+    <app-uv-timeline />
+
+    <app-aqi-panel
+      [aqi]="airQuality.aqi"
+      [pm25]="airQuality.pm25"
+      [pm10]="airQuality.pm10"
+      [o3]="airQuality.o3"
+      [no2]="airQuality.no2"
+    />
+
+    <div class="detail-tab__pair detail-tab__pair--bottom">
+      <app-moon-phase />
+
+      <app-section-card title="Atmosfera">
+        <div class="detail-tab__metrics-grid">
+          @for (item of atmosphericMetrics; track item.label) {
+            <app-stat-cell [label]="item.label" [value]="item.value" [unit]="item.unit" />
+          }
         </div>
-      </article>
-    }
+      </app-section-card>
+    </div>
   </div>
 </section>
