@@ -30,6 +30,7 @@ type FavoriteCity = {
   condition: string;
   conditionLabel: string;
   icon: string;
+  precipChance: number;
   humidity: number;
   windSpeed: number;
   windDirection: string;
@@ -43,6 +44,29 @@ type FavoriteMetric = {
   value: string;
   helper: string;
   tone: 'accent' | 'info' | 'sun' | 'success';
+};
+
+type ComparisonMetric = {
+  label: string;
+  value: string;
+  helper: string;
+  tone: 'accent' | 'info' | 'sun' | 'success';
+};
+
+type ComparisonResult = {
+  city: FavoriteCity;
+  differenceLabel: string;
+  headline: string;
+  summary: string[];
+  metrics: ComparisonMetric[];
+};
+
+type ComparisonOverview = {
+  reference: FavoriteCity;
+  warmest: string;
+  rainiest: string;
+  windiest: string;
+  spread: string;
 };
 
 const INITIAL_FAVORITES: FavoriteCity[] = [
@@ -59,6 +83,7 @@ const INITIAL_FAVORITES: FavoriteCity[] = [
     condition: 'partly-cloudy-day',
     conditionLabel: 'Mayormente soleado',
     icon: '/assets/icons/weather/partly-cloudy-day.svg',
+    precipChance: 18,
     humidity: 64,
     windSpeed: 18,
     windDirection: 'SE',
@@ -79,6 +104,7 @@ const INITIAL_FAVORITES: FavoriteCity[] = [
     condition: 'sun',
     conditionLabel: 'Cielo despejado',
     icon: '/assets/icons/weather/sun.svg',
+    precipChance: 4,
     humidity: 28,
     windSpeed: 12,
     windDirection: 'N',
@@ -99,6 +125,7 @@ const INITIAL_FAVORITES: FavoriteCity[] = [
     condition: 'cloudy',
     conditionLabel: 'Nuboso',
     icon: '/assets/icons/weather/cloudy.svg',
+    precipChance: 22,
     humidity: 45,
     windSpeed: 15,
     windDirection: 'SW',
@@ -119,6 +146,7 @@ const INITIAL_FAVORITES: FavoriteCity[] = [
     condition: 'rain',
     conditionLabel: 'Lluvia ligera',
     icon: '/assets/icons/weather/rain.svg',
+    precipChance: 74,
     humidity: 78,
     windSpeed: 9,
     windDirection: 'W',
@@ -139,6 +167,7 @@ const INITIAL_FAVORITES: FavoriteCity[] = [
     condition: 'fog',
     conditionLabel: 'Niebla',
     icon: '/assets/icons/weather/fog.svg',
+    precipChance: 16,
     humidity: 87,
     windSpeed: 21,
     windDirection: 'NW',
@@ -177,6 +206,43 @@ export class FavoritesPage implements OnInit, OnDestroy {
     return this.compareSelection()
       .map((id) => cities.find((city) => city.id === id))
       .filter((city): city is FavoriteCity => city !== undefined);
+  });
+
+  protected readonly compareReference = computed(() => this.compareCities()[0] ?? null);
+
+  protected readonly compareOverview = computed<ComparisonOverview | null>(() => {
+    const cities = this.compareCities();
+
+    if (cities.length < 2) {
+      return null;
+    }
+
+    const warmest = cities.reduce((current, city) => (city.temp > current.temp ? city : current));
+    const coldest = cities.reduce((current, city) => (city.temp < current.temp ? city : current));
+    const rainiest = cities.reduce((current, city) =>
+      city.precipChance > current.precipChance ? city : current
+    );
+    const windiest = cities.reduce((current, city) => (city.windSpeed > current.windSpeed ? city : current));
+
+    return {
+      reference: cities[0],
+      warmest: `${warmest.name} es la más cálida con ${warmest.temp}°`,
+      rainiest: hasRainRisk(rainiest)
+        ? `${rainiest.name} concentra la mayor probabilidad de lluvia, ${rainiest.precipChance}%`
+        : 'Ninguna ciudad muestra lluvia probable en esta selección',
+      windiest: `${windiest.name} tiene el viento más intenso, ${windiest.windSpeed} km/h`,
+      spread: `La brecha térmica total es de ${warmest.temp - coldest.temp}° entre ${warmest.name} y ${coldest.name}`
+    };
+  });
+
+  protected readonly comparisonResults = computed<ComparisonResult[]>(() => {
+    const [reference, ...cities] = this.compareCities();
+
+    if (!reference || cities.length === 0) {
+      return [];
+    }
+
+    return cities.map((city) => buildComparisonResult(reference, city));
   });
 
   protected readonly metrics = computed<FavoriteMetric[]>(() => {
@@ -240,6 +306,10 @@ export class FavoritesPage implements OnInit, OnDestroy {
 
   protected trackByMetric(_index: number, metric: FavoriteMetric): string {
     return metric.label;
+  }
+
+  protected trackByComparison(_index: number, comparison: ComparisonResult): string {
+    return comparison.city.id;
   }
 
   protected onAddCity(): void {
@@ -352,7 +422,7 @@ export class FavoritesPage implements OnInit, OnDestroy {
   }
 
   protected getDifferenceLabel(city: FavoriteCity): string {
-    const reference = this.compareCities()[0];
+    const reference = this.compareReference();
 
     if (!reference) {
       return 'Seleccioná otra ciudad para comparar';
@@ -418,4 +488,136 @@ export class FavoritesPage implements OnInit, OnDestroy {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function buildComparisonResult(reference: FavoriteCity, city: FavoriteCity): ComparisonResult {
+  const tempDelta = city.temp - reference.temp;
+  const feelsDelta = city.feelsLike - reference.feelsLike;
+  const rainDelta = city.precipChance - reference.precipChance;
+  const windDelta = city.windSpeed - reference.windSpeed;
+  const humidityDelta = city.humidity - reference.humidity;
+
+  return {
+    city,
+    differenceLabel: formatTemperatureDelta(tempDelta, reference.name),
+    headline:
+      tempDelta === 0
+        ? `${city.name} tiene la misma temperatura que ${reference.name}`
+        : `${city.name} está ${Math.abs(tempDelta)}° ${tempDelta > 0 ? 'más cálida' : 'más fría'} que ${reference.name}`,
+    summary: [
+      buildRainSummary(reference, city, rainDelta),
+      buildWindSummary(reference, city, windDelta),
+      buildComfortSummary(reference, city, feelsDelta, humidityDelta)
+    ],
+    metrics: [
+      {
+        label: 'Ahora',
+        value: `${city.temp}°`,
+        helper:
+          tempDelta === 0
+            ? `Misma lectura que ${reference.name}`
+            : `${Math.abs(tempDelta)}° ${tempDelta > 0 ? 'por encima' : 'por debajo'} de ${reference.name}`,
+        tone: tempDelta > 0 ? 'sun' : tempDelta < 0 ? 'info' : 'accent'
+      },
+      {
+        label: 'Lluvia',
+        value: `${city.precipChance}%`,
+        helper:
+          rainDelta === 0
+            ? `Mismo riesgo que ${reference.name}`
+            : `${Math.abs(rainDelta)} pts ${rainDelta > 0 ? 'más' : 'menos'} que ${reference.name}`,
+        tone: hasRainRisk(city) ? 'info' : 'success'
+      },
+      {
+        label: 'Viento',
+        value: `${city.windSpeed} km/h`,
+        helper:
+          windDelta === 0
+            ? `Misma intensidad que ${reference.name}`
+            : `${Math.abs(windDelta)} km/h ${windDelta > 0 ? 'más fuerte' : 'más calmo'}`,
+        tone: windDelta > 0 ? 'info' : 'accent'
+      },
+      {
+        label: 'Sensación',
+        value: `${city.feelsLike}°`,
+        helper:
+          feelsDelta === 0
+            ? `Se siente igual que ${reference.name}`
+            : `${Math.abs(feelsDelta)}° ${feelsDelta > 0 ? 'más alta' : 'más baja'} que ${reference.name}`,
+        tone: feelsDelta > 0 ? 'sun' : 'accent'
+      }
+    ]
+  };
+}
+
+function formatTemperatureDelta(delta: number, referenceName: string): string {
+  if (delta === 0) {
+    return `Igual que ${referenceName}`;
+  }
+
+  return `${delta > 0 ? '+' : ''}${delta}° vs ${referenceName}`;
+}
+
+function buildRainSummary(reference: FavoriteCity, city: FavoriteCity, rainDelta: number): string {
+  const referenceHasRain = hasRainRisk(reference);
+  const cityHasRain = hasRainRisk(city);
+
+  if (cityHasRain && !referenceHasRain) {
+    return `${city.name} sí tiene lluvia probable, ${city.precipChance}%, y ${reference.name} no.`;
+  }
+
+  if (!cityHasRain && referenceHasRain) {
+    return `${reference.name} mantiene lluvia probable, ${reference.precipChance}%, mientras ${city.name} no.`;
+  }
+
+  if (cityHasRain && referenceHasRain) {
+    if (rainDelta === 0) {
+      return `Las dos muestran lluvia probable con el mismo nivel de riesgo.`;
+    }
+
+    return `${city.name} tiene ${Math.abs(rainDelta)} puntos ${rainDelta > 0 ? 'más' : 'menos'} de probabilidad de lluvia que ${reference.name}.`;
+  }
+
+  return 'Ninguna de las dos muestra lluvia probable por ahora.';
+}
+
+function buildWindSummary(reference: FavoriteCity, city: FavoriteCity, windDelta: number): string {
+  if (windDelta === 0) {
+    return `El viento se mantiene parejo entre ${reference.name} y ${city.name}.`;
+  }
+
+  return `En ${city.name} el viento sopla ${Math.abs(windDelta)} km/h ${windDelta > 0 ? 'más fuerte' : 'más calmo'} que en ${reference.name}.`;
+}
+
+function buildComfortSummary(
+  reference: FavoriteCity,
+  city: FavoriteCity,
+  feelsDelta: number,
+  humidityDelta: number
+): string {
+  if (Math.abs(feelsDelta) <= 1 && Math.abs(humidityDelta) <= 6) {
+    return `La sensación general se mantiene muy parecida entre ambas ciudades.`;
+  }
+
+  if (feelsDelta > 0) {
+    return `${city.name} se siente más cálida, con ${Math.abs(feelsDelta)}° extra de sensación y ${describeHumidityShift(humidityDelta)}.`;
+  }
+
+  if (feelsDelta < 0) {
+    return `${city.name} se siente más fría, con ${Math.abs(feelsDelta)}° menos de sensación y ${describeHumidityShift(humidityDelta)}.`;
+  }
+
+  return `${city.name} conserva una sensación térmica similar a ${reference.name}, pero ${describeHumidityShift(humidityDelta)}.`;
+}
+
+function describeHumidityShift(delta: number): string {
+  if (Math.abs(delta) <= 6) {
+    return 'humedad similar';
+  }
+
+  return delta > 0 ? `${delta}% más de humedad` : `${Math.abs(delta)}% menos de humedad`;
+}
+
+function hasRainRisk(city: FavoriteCity): boolean {
+  return city.precipChance >= 35 || city.condition.includes('rain');
 }
