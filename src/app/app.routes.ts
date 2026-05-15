@@ -5,7 +5,11 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: DEFAULT_APP_ROUTE
+    redirectTo: APP_ROUTE_PATHS.favorites,
+  },
+  {
+    path: APP_ROUTE_PATHS.favorites,
+    loadComponent: () => import('./features/favorites/favorites.page').then((m) => m.FavoritesPage)
   },
   {
     path: APP_ROUTE_PATHS.detail,
@@ -33,6 +37,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: APP_ROUTE_PATHS.search
+    redirectTo: APP_ROUTE_PATHS.favorites
   }
 ];
