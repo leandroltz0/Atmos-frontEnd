@@ -198,17 +198,6 @@ export class SettingsPage implements OnInit {
         icon: 'palette',
         items: [
           {
-            id: 'theme',
-            type: 'select',
-            label: 'Tema',
-            description: 'Aspecto visual de la aplicación',
-            value: this.themeMode(),
-            options: [
-              { value: 'dark', label: 'Oscuro' },
-              { value: 'light', label: 'Claro' }
-            ]
-          },
-          {
             id: 'language',
             type: 'select',
             label: 'Idioma',
