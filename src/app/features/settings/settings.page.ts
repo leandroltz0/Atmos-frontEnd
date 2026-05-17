@@ -176,7 +176,7 @@ export class SettingsPage implements OnInit {
             options: [
               { value: 'kmh', label: 'km/h' },
               { value: 'mph', label: 'mph' },
-              { value: 'ms', label: 'm/s' }
+              { value: 'ms', label: 'm/s' }  
             ]
           },
           {
@@ -194,7 +194,7 @@ export class SettingsPage implements OnInit {
       },
       {
         id: 'appearance',
-        label: 'Apariencia',
+        label: 'Apariencia',                                                                                                 
         icon: 'palette',
         items: [
           {
