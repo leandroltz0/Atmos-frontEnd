@@ -58,7 +58,7 @@ const MOCK_USER: UserProfile = {
 
 const MOCK_STATS: ProfileStat[] = [
   { id: 'favorites', label: 'Favoritas', value: 5, icon: 'heart', tone: 'accent' },
-  { id: 'alerts', label: 'Alertas', value: 3, icon: 'zap', tone: 'info' },
+  { id: 'alerts', label: 'Alertas', value: 3, icon: 'bell', tone: 'info' },
   { id: 'days', label: 'Días activo', value: 42, icon: 'activity', tone: 'sun' }
 ];
 

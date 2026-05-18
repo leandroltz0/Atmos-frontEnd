@@ -379,21 +379,15 @@
 }
 
 .profile-stat__icon-wrap--accent {
-  background: rgba(58, 134, 255, 0.18);
-  border: 1px solid rgba(58, 134, 255, 0.32);
-  color: #6BA4FF;
+  color: var(--color-accent);
 }
 
 .profile-stat__icon-wrap--info {
-  background: rgba(72, 202, 228, 0.16);
-  border: 1px solid rgba(72, 202, 228, 0.30);
-  color: #7AD8ED;
+  color: var(--color-info);
 }
 
 .profile-stat__icon-wrap--sun {
-  background: rgba(255, 209, 102, 0.16);
-  border: 1px solid rgba(255, 209, 102, 0.30);
-  color: #FFDC8A;
+  color: var(--color-sun);
 }
 
 .profile-stat__svg {
