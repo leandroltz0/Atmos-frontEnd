@@ -6,7 +6,8 @@ export const APP_ROUTE_PATHS = {
   home: 'home',
   dashboard: 'dashboard',
   search: 'search',
-  settings: 'settings'
+  settings: 'settings',
+  profile: 'profile'
 } as const;
 
 export const DEFAULT_APP_ROUTE = APP_ROUTE_PATHS.favorites;

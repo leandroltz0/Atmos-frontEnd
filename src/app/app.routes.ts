@@ -5,7 +5,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: APP_ROUTE_PATHS.settings,
+    redirectTo: APP_ROUTE_PATHS.profile,
   },
   {
     path: APP_ROUTE_PATHS.settings,
@@ -34,6 +34,10 @@ export const routes: Routes = [
   {
     path: APP_ROUTE_PATHS.search,
     loadComponent: () => import('./features/search/search.page').then((m) => m.SearchPage)
+  },
+  {
+    path: APP_ROUTE_PATHS.profile,
+    loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage)
   },
   {
     path: APP_ROUTE_PATHS.onboarding,

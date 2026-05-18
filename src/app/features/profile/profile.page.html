@@ -1,0 +1,242 @@
+<main class="profile-shell font-body" role="main" [attr.aria-busy]="false">
+  <!-- ─── Background Orbs ─── -->
+  <div class="profile-bg" aria-hidden="true">
+    <div class="profile-bg__orb profile-bg__orb--1"></div>
+    <div class="profile-bg__orb profile-bg__orb--2"></div>
+    <div class="profile-bg__orb profile-bg__orb--3"></div>
+  </div>
+
+  <div class="profile-container">
+    <!-- ─── Header ─── -->
+    <header class="profile-header">
+      <button
+        mat-icon-button
+        type="button"
+        class="profile-back-btn"
+        aria-label="Volver a ajustes"
+        (click)="onGoBack()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <div class="profile-header__copy">
+        <p class="profile-eyebrow">Tu cuenta</p>
+        <h1 class="profile-title">Perfil</h1>
+      </div>
+
+      <span class="profile-version-badge" aria-label="Versión de la app">
+        v{{ appVersion() }}
+      </span>
+    </header>
+
+    <!-- ─── Hero: Avatar + Identity ─── -->
+    <section class="profile-hero" aria-label="Información de usuario">
+      <div class="profile-hero__avatar-wrapper">
+        <button
+          type="button"
+          class="profile-avatar"
+          matRipple
+          [matRippleCentered]="true"
+          (click)="onAvatarClick()"
+          aria-label="Cambiar foto de perfil"
+        >
+          @if (user().avatarUrl) {
+            <img
+              [src]="user().avatarUrl"
+              [alt]="user().displayName"
+              class="profile-avatar__img"
+            />
+          } @else {
+            <span class="profile-avatar__initials">{{ getUserInitials() }}</span>
+          }
+
+          <span class="profile-avatar__camera-badge" aria-hidden="true">
+            <mat-icon class="profile-avatar__camera-icon">photo_camera</mat-icon>
+          </span>
+        </button>
+      </div>
+
+      <div class="profile-hero__info">
+        @if (isEditingName()) {
+          <div class="profile-hero__edit-name">
+            <mat-form-field appearance="outline" class="profile-name-field">
+              <mat-label>Nombre</mat-label>
+              <input
+                matInput
+                [value]="editNameValue()"
+                (input)="editNameValue.set($any($event.target).value)"
+                (keydown.enter)="onSaveName()"
+                (keydown.escape)="onCancelEditName()"
+                maxlength="40"
+                autofocus
+                aria-label="Editar nombre de usuario"
+              />
+            </mat-form-field>
+            <div class="profile-hero__edit-actions">
+              <button mat-button class="profile-edit-cancel" (click)="onCancelEditName()">
+                Cancelar
+              </button>
+              <button mat-flat-button class="profile-edit-save" (click)="onSaveName()">
+                Guardar
+              </button>
+            </div>
+          </div>
+        } @else {
+          <h2 class="profile-hero__name">{{ user().displayName }}</h2>
+        }
+
+        <p class="profile-hero__email">
+          <mat-icon class="profile-hero__email-icon">mail_outline</mat-icon>
+          {{ user().email }}
+        </p>
+
+        <div class="profile-hero__meta">
+          <span class="profile-provider-badge">
+            <mat-icon class="profile-provider-badge__icon">
+              @if (user().authProvider === 'google') {
+                account_circle
+              } @else {
+                vpn_key
+              }
+            </mat-icon>
+            {{ getProviderLabel() }}
+          </span>
+          <span class="profile-member-badge">
+            <mat-icon class="profile-member-badge__icon">event</mat-icon>
+            Desde {{ user().memberSince }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Stats ─── -->
+    <section class="profile-stats" aria-label="Estadísticas de uso">
+      @for (stat of stats(); track stat.id) {
+        <div class="profile-stat" [class]="'profile-stat--' + stat.tone">
+          <div class="profile-stat__icon-wrap" [class]="'profile-stat__icon-wrap--' + stat.tone">
+            <mat-icon class="profile-stat__icon">{{ stat.icon }}</mat-icon>
+          </div>
+          <span class="profile-stat__value font-mono">{{ stat.value }}</span>
+          <span class="profile-stat__label">{{ stat.label }}</span>
+        </div>
+      }
+    </section>
+
+    <!-- ─── Account Group ─── -->
+    <section class="profile-group" aria-label="Cuenta">
+      <div class="profile-group__header">
+        <div class="profile-group__icon-shell">
+          <mat-icon class="profile-group__icon">person</mat-icon>
+        </div>
+        <h2 class="profile-group__label">Cuenta</h2>
+      </div>
+
+      <div class="profile-group__items">
+        @for (action of accountActions; track action.id) {
+          <div
+            class="profile-item"
+            matRipple
+            (click)="onActionTriggered(action.id)"
+            (keydown.enter)="onActionTriggered(action.id)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="action.label"
+          >
+            <div class="profile-item__leading">
+              <mat-icon class="profile-item__icon">{{ action.icon }}</mat-icon>
+            </div>
+            <div class="profile-item__content">
+              <span class="profile-item__label">{{ action.label }}</span>
+              <span class="profile-item__description">{{ action.description }}</span>
+            </div>
+            <mat-icon class="profile-item__chevron">chevron_right</mat-icon>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ─── Session Group ─── -->
+    <section class="profile-group" aria-label="Sesión">
+      <div class="profile-group__header">
+        <div class="profile-group__icon-shell profile-group__icon-shell--session">
+          <mat-icon class="profile-group__icon">security</mat-icon>
+        </div>
+        <h2 class="profile-group__label">Sesión</h2>
+      </div>
+
+      <div class="profile-group__items">
+        @for (action of sessionActions; track action.id) {
+          <div
+            class="profile-item"
+            [class.profile-item--danger]="action.tone === 'danger'"
+            matRipple
+            (click)="onActionTriggered(action.id)"
+            (keydown.enter)="onActionTriggered(action.id)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="action.label"
+          >
+            <div class="profile-item__leading" [class.profile-item__leading--danger]="action.tone === 'danger'">
+              <mat-icon class="profile-item__icon">{{ action.icon }}</mat-icon>
+            </div>
+            <div class="profile-item__content">
+              <span class="profile-item__label" [class.profile-item__label--danger]="action.tone === 'danger'">
+                {{ action.label }}
+              </span>
+              <span class="profile-item__description">{{ action.description }}</span>
+            </div>
+            <mat-icon class="profile-item__chevron">chevron_right</mat-icon>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ─── Footer ─── -->
+    <footer class="profile-footer">
+      <p class="profile-footer__text">ATMOS Weather App · v{{ appVersion() }}</p>
+      <p class="profile-footer__sub">Datos de Open-Meteo · Sin conexión a la nube</p>
+    </footer>
+  </div>
+
+  <!-- ─── Logout Confirmation Dialog ─── -->
+  <ng-template #logoutDialog>
+    <div class="atmos-dialog-content">
+      <div class="atmos-dialog-icon-wrap atmos-dialog-icon-wrap--warn">
+        <mat-icon class="atmos-dialog-icon">logout</mat-icon>
+      </div>
+      <h2 class="atmos-dialog-title">Cerrar sesión</h2>
+      <p class="atmos-dialog-body">
+        ¿Estás seguro de que querés cerrar sesión? Los datos locales se mantendrán en este dispositivo.
+      </p>
+      <div class="atmos-dialog-actions">
+        <button mat-button class="atmos-dialog-cancel" (click)="onDismissDialog()">
+          Cancelar
+        </button>
+        <button mat-flat-button class="atmos-dialog-confirm" (click)="onConfirmLogout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- ─── Delete Account Confirmation Dialog ─── -->
+  <ng-template #deleteDialog>
+    <div class="atmos-dialog-content">
+      <div class="atmos-dialog-icon-wrap atmos-dialog-icon-wrap--danger">
+        <mat-icon class="atmos-dialog-icon">delete_forever</mat-icon>
+      </div>
+      <h2 class="atmos-dialog-title">Eliminar cuenta</h2>
+      <p class="atmos-dialog-body">
+        Esta acción es <strong>permanente e irreversible</strong>. Se eliminarán todos tus datos: favoritos, alertas y preferencias.
+      </p>
+      <div class="atmos-dialog-actions">
+        <button mat-button class="atmos-dialog-cancel" (click)="onDismissDialog()">
+          Cancelar
+        </button>
+        <button mat-flat-button class="atmos-dialog-confirm atmos-dialog-confirm--danger" (click)="onConfirmDelete()">
+          Eliminar cuenta
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</main>

@@ -1761,3 +1761,42 @@ app-detail {
     }
   }
 }
+
+// ─── Global: MatDialog Atmos Panel ───
+.atmos-dialog .mat-mdc-dialog-container {
+  --mdc-dialog-container-color: #132640;
+  --mdc-dialog-container-shape: 24px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+// ─── Global: MatSnackBar Atmos ───
+.atmos-snackbar .mdc-snackbar__surface {
+  background: #1B3A5C !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px !important;
+
+  .mdc-snackbar__label {
+    color: var(--color-text-primary) !important;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.85rem;
+  }
+
+  .mat-mdc-snack-bar-action .mdc-button__label {
+    color: var(--color-accent) !important;
+    font-weight: 600;
+  }
+}
+
+.atmos-snackbar--warn .mdc-snackbar__surface {
+  background: #1B3A5C !important;
+  border-color: rgba(239, 68, 68, 0.2);
+
+  .mat-mdc-snack-bar-action .mdc-button__label {
+    color: var(--color-danger) !important;
+  }
+}
