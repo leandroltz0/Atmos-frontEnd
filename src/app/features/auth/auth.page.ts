@@ -67,7 +67,7 @@ export class AuthPage implements AfterViewInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
 
-  protected readonly mode = signal<AuthMode>('signin');
+  protected readonly mode = signal<AuthMode>('signup');
   protected readonly isSubmitting = signal(false);
   protected readonly hideSignInPassword = signal(true);
   protected readonly hideSignUpPassword = signal(true);
