@@ -73,22 +73,39 @@
 
 .hero-stage {
   position: relative;
-  flex: 1;
-  min-height: 100dvh;
-  width: 100%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 
-  @media (max-width: 1023px) {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding: clamp(220px, 40dvh, 320px) 0 0;
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: stretch;
+    width: min(100%, 1180px);
+    margin: 0 auto;
+    gap: clamp(3rem, 4vw, 4.5rem);
+    padding-inline: clamp(2.5rem, 3.6vw, 3.5rem);
+  }
+}
+
+.globe-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 2.5rem 1.5rem 1rem;
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    min-height: 54vh;
+    padding-top: 3.75rem;
   }
 
   @media (min-width: 1024px) {
-    width: min(100%, 1180px);
-    min-height: 100dvh;
-    margin: 0 auto;
+    flex: 0 1 54%;
+    min-height: 100vh;
+    justify-content: flex-end;
+    padding: 3rem 0;
   }
 }
 
@@ -100,10 +117,9 @@
 }
 
 .globe-wrap {
-  position: absolute;
+  position: relative;
   z-index: 5;
   pointer-events: none;
-  transform: translateX(-3rem);
   filter:
     drop-shadow(0 0 48px rgba(7, 18, 34, 0.68))
     drop-shadow(0 0 82px rgba(56, 189, 248, 0.08));
@@ -139,35 +155,30 @@
 }
 
 .content-panel {
-  position: absolute;
-  z-index: 10;
-  bottom: 0;
-  left: 50%;
-  right: auto;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   width: min(calc(100% - 56px), 480px);
-  transform: translateX(-50%);
-  padding: 0 28px 44px;
-  max-width: none;
+  margin-inline: auto;
+  padding: 1rem 0 2.75rem;
+  text-align: center;
+  z-index: 10;
 
-  @media (min-width: 768px) {
+  @media (min-width: 768px) and (max-width: 1023px) {
     width: min(calc(100% - 72px), 560px);
-    padding: 0 36px 52px;
+    padding: 0.5rem 0 3rem;
   }
 
   @media (min-width: 1024px) {
-    top: 26px;
-    right: 20rem;
-    bottom: 0;
-    left: calc(50% + 1rem);
+    flex: 0 1 46%;
     width: auto;
-    max-width: 28rem;
-    min-width: 0;
-    transform: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    min-height: 100vh;
+    margin-inline: 0;
     align-items: flex-start;
+    justify-content: center;
+    max-width: 28rem;
+    padding: 0;
     text-align: left;
   }
 }

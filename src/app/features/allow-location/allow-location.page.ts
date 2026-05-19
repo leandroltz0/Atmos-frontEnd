@@ -525,40 +525,18 @@ export class AllowLocationPage implements AfterViewInit, OnDestroy {
     return particle;
   }
 
-  // Layout: desktop is center-balanced, mobile/tablet stays vertically readable.
+  // Layout: CSS Flexbox handles position; JS only syncs canvas size to breakpoint.
   private positionGlobe(): void {
-    const { globeSize, layout } = this.getBreakpointConfig();
+    const { globeSize } = this.getBreakpointConfig();
     const wrap = this.globeWrap.nativeElement;
-    const stageWidth = this.heroStage.nativeElement.clientWidth || this.rootRef.nativeElement.clientWidth || window.innerWidth;
-    const stageHeight = this.heroStage.nativeElement.clientHeight || this.rootRef.nativeElement.clientHeight || window.innerHeight;
 
     wrap.style.width = `${globeSize}px`;
     wrap.style.height = `${globeSize}px`;
-
-    if (layout === 'desktop') {
-      const stageCenter = stageWidth / 2;
-      // Subtracting 64px (4rem) to move it further left
-      wrap.style.left = `${stageCenter - 352}px`;
-      wrap.style.top = '50%';
-      wrap.style.transform = 'translate(-50%, -50%)';
-    } else {
-      wrap.style.left = '50%';
-      wrap.style.top = `${this.getMobileGlobeTop(stageHeight, layout)}px`;
-      wrap.style.transform = 'translateX(-50%)';
-    }
 
     if (this.renderer && this.camera) {
       this.renderer.setSize(globeSize, globeSize);
       this.camera.updateProjectionMatrix();
     }
-  }
-
-  private getMobileGlobeTop(stageHeight: number, layout: Exclude<LayoutMode, 'desktop'>): number {
-    const preferredTop = layout === 'tablet' ? stageHeight * 0.18 : stageHeight * 0.2;
-    const maxTop = layout === 'tablet' ? 132 : 168;
-    const minTop = layout === 'tablet' ? 56 : 72;
-
-    return Math.max(minTop, Math.min(preferredTop, maxTop));
   }
 
   // Entry sequence: globe first, then pin, then copy and actions.
