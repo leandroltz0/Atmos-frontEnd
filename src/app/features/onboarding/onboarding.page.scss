@@ -170,6 +170,11 @@ $separator-color: rgba(255, 255, 255, 0.04);
 /* Desktop */
 
 @media (min-width: 1025px) {
+  .onboarding-shell {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
   .onboarding-layout {
     flex-direction: row;
     align-items: stretch;
@@ -177,11 +182,14 @@ $separator-color: rgba(255, 255, 255, 0.04);
     margin: 0 auto;
     gap: clamp(3rem, 4vw, 4.5rem);
     padding-inline: clamp(2.5rem, 3.6vw, 3.5rem);
+    height: 100dvh;
+    box-sizing: border-box;
   }
 
   .globe-panel {
     flex: 0 1 54%;
-    min-height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
     justify-content: flex-end;
     padding: 3rem 0;
   }
@@ -198,7 +206,8 @@ $separator-color: rgba(255, 255, 255, 0.04);
   .content-panel {
     flex: 0 1 46%;
     width: auto;
-    min-height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
     margin-inline: 0;
     align-items: flex-start;
     justify-content: center;
