@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
 import { createStarfieldState, drawStarfieldFrame, StarfieldState } from '../../shared/utils/canvas-starfield';
 import { DisposableResource, disposeSceneResources, SceneResourceRoot } from '../../shared/utils/three-disposal';
+import { _MatCheckboxRequiredValidatorModule } from '@angular/material/checkbox';
 
 
 
@@ -89,7 +90,7 @@ export class AllowLocationPage implements AfterViewInit, OnDestroy {
   @ViewChild('heroStage') private readonly heroStage!: ElementRef<HTMLDivElement>;
   @ViewChild('headline') private readonly headline!: ElementRef<HTMLElement>;
   @ViewChild('description') private readonly description!: ElementRef<HTMLElement>;
-  @ViewChild('allowBtn') private readonly allowBtn!: ElementRef<HTMLButtonElement>;
+  @ViewChild('allowBtn', { read: ElementRef }) private readonly allowBtn!: ElementRef<HTMLButtonElement>;
   @ViewChild('skipLink') private readonly skipLink!: ElementRef<HTMLElement>;
   @ViewChild('pinDot') private readonly pinDot!: ElementRef<HTMLDivElement>;
 
@@ -158,13 +159,13 @@ export class AllowLocationPage implements AfterViewInit, OnDestroy {
     this.playGrantedButtonAnimation();
 
     if (!navigator.geolocation) {
-      this.navigateHomeAfterDelay();
+      this.navigateAuthAfterDelay();
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      () => this.navigateHomeAfterDelay(),
-      () => this.navigateHomeAfterDelay()
+      () => this.navigateAuthAfterDelay(),
+      () => this.navigateAuthAfterDelay()
     );
   }
 
@@ -174,16 +175,16 @@ export class AllowLocationPage implements AfterViewInit, OnDestroy {
       y: -20,
       duration: 0.4,
       ease: 'power2.in',
-      onComplete: () => void this.navigateHome()
+      onComplete: () => void this.navigateAuth()
     });
   }
 
-  private navigateHomeAfterDelay(): void {
-    window.setTimeout(() => void this.navigateHome(), HOME_NAVIGATION_DELAY_MS);
+  private navigateAuthAfterDelay(): void {
+    window.setTimeout(() => void this.navigateAuth(), HOME_NAVIGATION_DELAY_MS);
   }
 
-  private navigateHome(): Promise<boolean> {
-    return this.router.navigate([`/${APP_ROUTE_PATHS.home}`]);
+  private navigateAuth(): Promise<boolean> {
+    return this.ngZone.run(() => this.router.navigate([`/${APP_ROUTE_PATHS.auth}`]));
   }
 
   private playGrantedButtonAnimation(): void {
