@@ -25,7 +25,11 @@
     </header>
 
     <div class="auth-layout">
-      <section class="auth-panel auth-panel--form auth-reveal" aria-labelledby="auth-heading">
+      <section
+        class="auth-panel auth-panel--form auth-reveal"
+        [class.auth-panel--form-signup]="mode() === 'signup'"
+        aria-labelledby="auth-heading"
+      >
         <div class="auth-panel__inner">
           <p class="auth-kicker">Private weather access</p>
           <h1 class="auth-title" id="auth-heading">
