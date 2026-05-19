@@ -1800,3 +1800,26 @@ app-detail {
     color: var(--color-danger) !important;
   }
 }
+
+/* --- Global Button Styles --- */
+.mat-mdc-unelevated-button.atmos-primary-btn {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-info) 100%) !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important; /* Pill shape */
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  transition: filter 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 15px rgba(58, 134, 255, 0.25) !important;
+  border: none !important;
+
+  &:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 6px 20px rgba(58, 134, 255, 0.4) !important;
+    transform: translateY(-1px);
+  }
+
+  .mdc-button__label {
+    z-index: 1;
+    position: relative;
+  }
+}

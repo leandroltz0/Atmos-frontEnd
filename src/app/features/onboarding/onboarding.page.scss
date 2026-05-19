@@ -118,7 +118,7 @@ $separator-color: rgba(255, 255, 255, 0.04);
 
 /* CTA */
 
-.cta-button.mat-mdc-outlined-button {
+.cta-button.mat-mdc-unelevated-button {
   width: 80%;
   max-width: 30rem;
   min-height: 4.5rem;
@@ -126,7 +126,7 @@ $separator-color: rgba(255, 255, 255, 0.04);
   padding-inline: 1.25rem;
 }
 
-.cta-button.mat-mdc-outlined-button .mdc-button__label {
+.cta-button.mat-mdc-unelevated-button .mdc-button__label {
   font-size: 0.96rem;
 }
 
@@ -160,7 +160,7 @@ $separator-color: rgba(255, 255, 255, 0.04);
     font-size: 1rem;
   }
 
-  .cta-button.mat-mdc-outlined-button {
+  .cta-button.mat-mdc-unelevated-button {
     width: 80%;
     max-width: 28rem;
     margin-top: 2.4rem;
@@ -229,7 +229,7 @@ $separator-color: rgba(255, 255, 255, 0.04);
     font-size: 1.0625rem;
   }
 
-  .cta-button.mat-mdc-outlined-button {
+  .cta-button.mat-mdc-unelevated-button {
     width: 250px;
     max-width: none;
     margin-top: 2.5rem;
