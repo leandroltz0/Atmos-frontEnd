@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -8,6 +9,7 @@ import {
   inject,
   signal
 } from '@angular/core';
+import { finalize } from 'rxjs';
 import {
   AbstractControl,
   FormBuilder,
@@ -27,6 +29,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { gsap } from 'gsap';
 
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
+import { AuthService } from '../../core/services/auth.service';
 import { AuthPreviewPanelComponent } from './components/auth-preview-panel/auth-preview-panel.component';
 
 type AuthMode = 'signin' | 'signup';
@@ -66,9 +69,11 @@ export class AuthPage implements AfterViewInit {
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   protected readonly mode = signal<AuthMode>('signup');
   protected readonly isSubmitting = signal(false);
+  protected readonly submitError = signal<string | null>(null);
   protected readonly hideSignInPassword = signal(true);
   protected readonly hideSignUpPassword = signal(true);
   protected readonly hideConfirmPassword = signal(true);
@@ -109,6 +114,7 @@ export class AuthPage implements AfterViewInit {
       return;
     }
 
+    this.submitError.set(null);
     this.mode.set(mode);
   }
 
@@ -120,13 +126,47 @@ export class AuthPage implements AfterViewInit {
       return;
     }
 
+    this.submitError.set(null);
     this.isSubmitting.set(true);
 
-    window.setTimeout(() => {
-      this.isSubmitting.set(false);
-      const targetRoute = this.mode() === 'signup' ? APP_ROUTE_PATHS.dashboard : APP_ROUTE_PATHS.allowLocation;
-      void this.router.navigate([`/${targetRoute}`]);
-    }, 900);
+    if (this.mode() === 'signin') {
+      this.authService.login({
+        email: this.signInForm.controls.email.getRawValue().trim(),
+        password: this.signInForm.controls.password.getRawValue()
+      }).pipe(
+        finalize(() => this.isSubmitting.set(false))
+      ).subscribe({
+        next: () => {
+          void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`]);
+        },
+        error: (error: unknown) => {
+          this.submitError.set(this.getRequestErrorMessage(
+            error,
+            'No se pudo iniciar sesión. Revisá tus credenciales o el backend.'
+          ));
+        }
+      });
+
+      return;
+    }
+
+    this.authService.register({
+      name: this.signUpForm.controls.fullName.getRawValue().trim(),
+      email: this.signUpForm.controls.email.getRawValue().trim(),
+      password: this.signUpForm.controls.password.getRawValue()
+    }).pipe(
+      finalize(() => this.isSubmitting.set(false))
+    ).subscribe({
+      next: () => {
+        void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`]);
+      },
+      error: (error: unknown) => {
+        this.submitError.set(this.getRequestErrorMessage(
+          error,
+          'No se pudo crear la cuenta. Revisá los datos o el backend.'
+        ));
+      }
+    });
   }
 
   protected continueWithGoogle(): void {
@@ -161,5 +201,45 @@ export class AuthPage implements AfterViewInit {
   protected getPasswordMismatchError(): boolean {
     return this.signUpForm.hasError('passwordMismatch')
       && this.shouldShowControlError(this.signUpForm.controls.confirmPassword);
+  }
+
+  private getRequestErrorMessage(error: unknown, fallbackMessage: string): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return fallbackMessage;
+    }
+
+    const backendMessage = this.extractBackendMessage(error.error);
+
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    if (error.status > 0) {
+      return `${fallbackMessage} (HTTP ${error.status})`;
+    }
+
+    return `${fallbackMessage} No hubo respuesta del servidor.`;
+  }
+
+  private extractBackendMessage(payload: unknown): string | null {
+    if (typeof payload === 'string' && payload.trim()) {
+      return payload;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const maybeMessage = 'message' in payload ? payload.message : null;
+    if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
+      return maybeMessage;
+    }
+
+    const maybeError = 'error' in payload ? payload.error : null;
+    if (typeof maybeError === 'string' && maybeError.trim()) {
+      return maybeError;
+    }
+
+    return null;
   }
 }

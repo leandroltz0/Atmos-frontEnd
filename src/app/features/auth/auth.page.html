@@ -72,6 +72,10 @@
             <span></span>
           </div>
 
+          @if (submitError()) {
+            <p class="auth-inline-error">{{ submitError() }}</p>
+          }
+
           @if (mode() === 'signin') {
             <form
               class="auth-form auth-form--signin"
