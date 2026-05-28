@@ -19,6 +19,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 import { gsap } from 'gsap';
 
 import { WeatherIconComponent } from '../../shared/components/weather-icon/weather-icon.component';
+import { QuickNavComponent } from '../../shared/components/quick-nav/quick-nav.component';
 import {
   CurrentWeather,
   DailyForecast,
@@ -61,8 +62,8 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('es-AR', {
     RouterModule,
     MatButtonModule,
     MatTooltipModule,
-    MatRippleModule,
-    WeatherIconComponent
+    WeatherIconComponent,
+    QuickNavComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.page.html',
@@ -204,20 +205,8 @@ export class DashboardPage implements OnInit, OnDestroy {
     void this.router.navigate(['/detail']);
   }
 
-  protected goToFavorites(): void {
-    void this.router.navigate(['/favorites']);
-  }
-
   protected goToSearch(): void {
     void this.router.navigate(['/search']);
-  }
-
-  protected goToProfile(): void {
-    void this.router.navigate(['/profile']);
-  }
-
-  protected goToSettings(): void {
-    void this.router.navigate(['/settings']);
   }
 
   // ── Private ─────────────────────────────────────────────

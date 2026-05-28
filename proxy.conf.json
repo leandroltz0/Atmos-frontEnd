@@ -4,5 +4,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"
+  },
+  "/cities": {
+    "target": "http://localhost:5008",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
   }
 }
