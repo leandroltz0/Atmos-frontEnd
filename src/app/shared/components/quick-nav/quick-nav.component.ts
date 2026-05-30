@@ -1,6 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  DestroyRef,
+  inject,
+  signal,
+  viewChild,
+  ElementRef
+} from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { MatRippleModule } from '@angular/material/core';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { gsap } from 'gsap';
 
 import { APP_ROUTE_PATHS } from '../../../core/routing/app-route-paths';
 
@@ -9,9 +22,26 @@ import { APP_ROUTE_PATHS } from '../../../core/routing/app-route-paths';
   standalone: true,
   imports: [MatRippleModule],
   template: `
-    <nav class="db-quick-nav" aria-label="Navegación principal">
+    <nav #navRef class="db-quick-nav" aria-label="Navegación principal">
       <button
         class="db-nav-btn"
+        [class.active]="isActive(APP_ROUTE_PATHS.dashboard)"
+        (click)="goToHome()"
+        matRipple
+        aria-label="Inicio"
+        id="nav-home"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+          <path d="M3 12L12 3L21 12" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M5 10V20H19V10" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M10 20V14H14V20" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        </svg>
+        <span>Inicio</span>
+      </button>
+
+      <button
+        class="db-nav-btn"
+        [class.active]="isActive(APP_ROUTE_PATHS.favorites)"
         (click)="goToFavorites()"
         matRipple
         aria-label="Favoritos"
@@ -28,6 +58,7 @@ import { APP_ROUTE_PATHS } from '../../../core/routing/app-route-paths';
 
       <button
         class="db-nav-btn"
+        [class.active]="isActive(APP_ROUTE_PATHS.search)"
         (click)="goToSearch()"
         matRipple
         aria-label="Buscar"
@@ -42,6 +73,7 @@ import { APP_ROUTE_PATHS } from '../../../core/routing/app-route-paths';
 
       <button
         class="db-nav-btn"
+        [class.active]="isActive(APP_ROUTE_PATHS.profile)"
         (click)="goToProfile()"
         matRipple
         aria-label="Perfil"
@@ -56,6 +88,7 @@ import { APP_ROUTE_PATHS } from '../../../core/routing/app-route-paths';
 
       <button
         class="db-nav-btn"
+        [class.active]="isActive(APP_ROUTE_PATHS.settings)"
         (click)="goToSettings()"
         matRipple
         aria-label="Ajustes"
@@ -72,8 +105,92 @@ import { APP_ROUTE_PATHS } from '../../../core/routing/app-route-paths';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QuickNavComponent {
+export class QuickNavComponent implements AfterViewInit, OnDestroy {
+  protected readonly APP_ROUTE_PATHS = APP_ROUTE_PATHS;
+
+  private readonly navRef = viewChild<ElementRef<HTMLElement>>('navRef');
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly activeRoute = signal(this.router.url);
+  private mm?: gsap.MatchMedia;
+
+  constructor() {
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((e) => {
+      this.activeRoute.set(e.urlAfterRedirects);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    const navEl = this.navRef()?.nativeElement;
+    if (!navEl) return;
+
+    const mm = gsap.matchMedia();
+
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const btns = navEl.querySelectorAll<HTMLButtonElement>('.db-nav-btn');
+
+      btns.forEach((btn) => {
+        const icon = btn.querySelector('svg');
+        const span = btn.querySelector('span');
+
+        btn.addEventListener('mouseenter', () => {
+          gsap.to(icon, {
+            y: -3,
+            scale: 1.18,
+            duration: 0.35,
+            ease: 'back.out(1.7)',
+            overwrite: 'auto'
+          });
+          gsap.to(span, {
+            opacity: 0.95,
+            duration: 0.2,
+            overwrite: 'auto'
+          });
+        });
+
+        btn.addEventListener('mouseleave', () => {
+          gsap.to(icon, {
+            y: 0,
+            scale: 1,
+            duration: 0.3,
+            ease: 'power3.out',
+            overwrite: 'auto'
+          });
+          gsap.to(span, {
+            opacity: 0.6,
+            duration: 0.2,
+            overwrite: 'auto'
+          });
+        });
+      });
+
+      return () => {
+        btns.forEach((btn) => {
+          const icon = btn.querySelector('svg');
+          const span = btn.querySelector('span');
+          gsap.set(icon, { y: 0, scale: 1, clearProps: 'all' });
+          gsap.set(span, { opacity: '', clearProps: 'all' });
+        });
+      };
+    });
+
+    this.mm = mm;
+  }
+
+  ngOnDestroy(): void {
+    this.mm?.revert();
+  }
+
+  protected isActive(routePath: string): boolean {
+    return this.activeRoute().startsWith(`/${routePath}`);
+  }
+
+  protected goToHome(): void {
+    void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`]);
+  }
 
   protected goToFavorites(): void {
     void this.router.navigate([`/${APP_ROUTE_PATHS.favorites}`]);

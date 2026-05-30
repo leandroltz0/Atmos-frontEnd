@@ -1,4 +1,4 @@
-<main class="favorites-shell font-body" role="main" [attr.aria-busy]="false">
+<main class="favorites-shell font-body" role="main" [attr.aria-busy]="isLoading()">
   <div class="favorites-bg" aria-hidden="true">
     <div class="favorites-bg__orb favorites-bg__orb--1"></div>
     <div class="favorites-bg__orb favorites-bg__orb--2"></div>
@@ -38,7 +38,44 @@
       </div>
     }
 
-    <section class="favorites-metrics" aria-label="Resumen rápido">
+    @if (isLoading()) {
+      <div class="favorites-loading" aria-busy="true" aria-label="Cargando favoritos">
+        <div class="favorites-loading__metrics">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="glass-card pulse favorites-loading__stat"></div>
+          }
+        </div>
+
+        <div class="favorites-loading__layout">
+          <div class="favorites-loading__list">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="glass-card pulse favorites-loading__card"></div>
+            }
+          </div>
+          <div class="glass-card pulse favorites-loading__panel"></div>
+        </div>
+      </div>
+    } @else if (error()) {
+      <div class="favorites-error" role="alert" aria-live="assertive">
+        <div class="favorites-error__icon-shell" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" class="favorites-error__icon">
+            <circle cx="32" cy="32" r="24" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+            <path d="M32 20v14M32 40v2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="favorites-error__title">Ocurrió un error</p>
+        <p class="favorites-error__body">{{ error() }}</p>
+        <div class="favorites-error__actions">
+          <button mat-flat-button type="button" class="favorites-primary-btn" (click)="loadFavorites()">
+            Reintentar
+          </button>
+          <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="onRestoreDemo()">
+            Restaurar demo
+          </button>
+        </div>
+      </div>
+    } @else {
+      <section class="favorites-metrics" aria-label="Resumen rápido">
       @for (metric of metrics(); track metric.label) {
         <article class="metric-card" [class.metric-card--accent]="metric.tone === 'accent'" [class.metric-card--info]="metric.tone === 'info'" [class.metric-card--sun]="metric.tone === 'sun'" [class.metric-card--success]="metric.tone === 'success'">
           <span class="metric-card__label">{{ metric.label }}</span>
@@ -358,5 +395,6 @@
         </div>
       }
     </section>
+    }
   </div>
 </main>

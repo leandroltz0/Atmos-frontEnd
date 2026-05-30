@@ -19,7 +19,6 @@ import { catchError, forkJoin, of } from 'rxjs';
 import { gsap } from 'gsap';
 
 import { WeatherIconComponent } from '../../shared/components/weather-icon/weather-icon.component';
-import { QuickNavComponent } from '../../shared/components/quick-nav/quick-nav.component';
 import {
   CurrentWeather,
   DailyForecast,
@@ -37,6 +36,7 @@ import {
 } from './dashboard.utils';
 import { AuthService } from '../../core/services/auth.service';
 import { WeatherService } from '../../core/services/weather.service';
+import { GeocodeService } from '../../core/services/geocode.service';
 import {
   weatherCodeToCondition,
   weatherCodeToLabel,
@@ -62,8 +62,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('es-AR', {
     RouterModule,
     MatButtonModule,
     MatTooltipModule,
-    WeatherIconComponent,
-    QuickNavComponent
+    WeatherIconComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.page.html',
@@ -106,6 +105,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly weatherService = inject(WeatherService);
+  private readonly geocodeService = inject(GeocodeService);
 
   private ctx?: gsap.Context;
   private loadTimer?: number;
@@ -123,8 +123,8 @@ export class DashboardPage implements OnInit, OnDestroy {
     const params = this.activatedRoute.snapshot.queryParams;
     const lat = params['lat'] || localStorage.getItem('atmos_lat');
     const lon = params['lon'] || localStorage.getItem('atmos_lon');
-    const city = params['city'] || 'Ubicación actual';
-    const country = params['country'] || '';
+    const city = params['city'] || localStorage.getItem('atmos_city') || 'Ubicación actual';
+    const country = params['country'] || localStorage.getItem('atmos_country') || '';
 
     if (lat && lon) {
       this.currentLat = Number(lat);
@@ -210,6 +210,10 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   // ── Private ─────────────────────────────────────────────
+  private formatLocationName(name: string): string {
+    return name.replace(/^Partido de /i, 'Ubicación de ');
+  }
+
   private loadWeatherData(city: string, country: string): void {
     const lat = this.currentLat!;
     const lon = this.currentLon!;
@@ -219,20 +223,26 @@ export class DashboardPage implements OnInit, OnDestroy {
       forecast: this.weatherService.getForecast(lat, lon),
       airQuality: this.weatherService.getAirQuality(lat, lon).pipe(
         catchError(() => of({ aqi: 0 }))
+      ),
+      geocode: this.geocodeService.reverse(lat, lon).pipe(
+        catchError(() => of(null))
       )
     }).subscribe({
-      next: ({ current: currentRes, forecast, airQuality }) => {
+      next: ({ current: currentRes, forecast, airQuality, geocode }) => {
         const currentData = currentRes.current ?? {};
         const wmoCode = currentData.weatherCode ?? 0;
         const isDay = currentData.isDay ?? 1;
         const aqiValue = airQuality?.aqi != null ? usAqiToLevel(airQuality.aqi) : 0;
 
+        const resolvedCity = this.formatLocationName(geocode?.city || city || 'Ubicación actual');
+        const resolvedCountry = geocode?.countryCode || country || '';
+
         const dailyItems: any[] = forecast.forecast ?? [];
         const todayItem = dailyItems[0] ?? {};
 
         const current: CurrentWeather = {
-          cityName: city,
-          country,
+          cityName: resolvedCity,
+          country: resolvedCountry,
           temp: Math.round(currentData.temperature ?? 0),
           feelsLike: Math.round(currentData.apparentTemperature ?? 0),
           condition: weatherCodeToCondition(wmoCode, isDay),
@@ -252,6 +262,8 @@ export class DashboardPage implements OnInit, OnDestroy {
         };
 
         this.currentWeather.set(current);
+        if (resolvedCity && resolvedCity !== 'Ubicación actual') localStorage.setItem('atmos_city', resolvedCity);
+        if (resolvedCountry) localStorage.setItem('atmos_country', resolvedCountry);
 
         const hourlyList: any[] = forecast.hourly ?? [];
         if (hourlyList.length) {

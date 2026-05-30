@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -18,17 +19,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-
+import { finalize } from 'rxjs';
 
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
-
-type UserProfile = {
-  displayName: string;
-  email: string;
-  avatarUrl: string | null;
-  authProvider: 'email' | 'google';
-  memberSince: string;
-};
+import { AuthService } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { PublicUser } from '../../core/models/favorite.model';
 
 type ProfileStat = {
   id: string;
@@ -46,20 +43,9 @@ type ProfileAction = {
   tone: 'default' | 'danger';
 };
 
-const STORAGE_KEY = 'atmos.profile';
-
-const MOCK_USER: UserProfile = {
-  displayName: 'Leandro García',
-  email: 'leandro.garcia@email.com',
-  avatarUrl: null,
-  authProvider: 'email',
-  memberSince: 'Enero 2026'
-};
-
-const MOCK_STATS: ProfileStat[] = [
-  { id: 'favorites', label: 'Favoritas', value: 5, icon: 'heart', tone: 'accent' },
-  { id: 'alerts', label: 'Alertas', value: 3, icon: 'bell', tone: 'info' },
-  { id: 'days', label: 'Días activo', value: 42, icon: 'activity', tone: 'sun' }
+const INITIAL_STATS: ProfileStat[] = [
+  { id: 'favorites', label: 'Favoritas', value: 0, icon: 'heart', tone: 'accent' },
+  { id: 'days', label: 'Días activo', value: 0, icon: 'activity', tone: 'sun' }
 ];
 
 @Component({
@@ -84,17 +70,37 @@ const MOCK_STATS: ProfileStat[] = [
 export class ProfilePage implements OnInit {
   @ViewChild('logoutDialog') logoutDialogRef!: TemplateRef<unknown>;
   @ViewChild('deleteDialog') deleteDialogRef!: TemplateRef<unknown>;
+  @ViewChild('changePasswordDialog') changePasswordDialogRef!: TemplateRef<unknown>;
 
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
+  private readonly favoritesService = inject(FavoritesService);
 
-
-  protected readonly user = signal<UserProfile>({ ...MOCK_USER });
-  protected readonly stats = signal<ProfileStat[]>([...MOCK_STATS]);
+  protected readonly user = signal<Pick<PublicUser, 'name' | 'email'> & { memberSince: string }>({
+    name: '',
+    email: '',
+    memberSince: ''
+  });
+  protected readonly stats = signal<ProfileStat[]>([...INITIAL_STATS]);
   protected readonly isEditingName = signal(false);
   protected readonly editNameValue = signal('');
+  protected readonly isSavingName = signal(false);
   protected readonly appVersion = signal('1.0.0-beta');
+
+  // Change password dialog
+  protected readonly cpCurrent = signal('');
+  protected readonly cpNew = signal('');
+  protected readonly cpConfirm = signal('');
+  protected readonly isChangingPassword = signal(false);
+  protected readonly cpError = signal('');
+
+  // Delete account dialog
+  protected readonly deletePassword = signal('');
+  protected readonly isDeleting = signal(false);
+  protected readonly deleteError = signal('');
 
   protected readonly accountActions: ProfileAction[] = [
     {
@@ -131,20 +137,16 @@ export class ProfilePage implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.restoreProfile();
+    this.loadProfile();
   }
 
   protected getUserInitials(): string {
-    const name = this.user().displayName;
+    const name = this.user().name;
     const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
-  }
-
-  protected getProviderLabel(): string {
-    return this.user().authProvider === 'google' ? 'Google' : 'Email';
   }
 
   protected onGoBack(): void {
@@ -159,7 +161,7 @@ export class ProfilePage implements OnInit {
   }
 
   protected onStartEditName(): void {
-    this.editNameValue.set(this.user().displayName);
+    this.editNameValue.set(this.user().name);
     this.isEditingName.set(true);
   }
 
@@ -173,12 +175,26 @@ export class ProfilePage implements OnInit {
       return;
     }
 
-    this.user.update((u) => ({ ...u, displayName: trimmed }));
-    this.isEditingName.set(false);
-    this.persistProfile();
-    this.snackBar.open('Nombre actualizado', 'OK', {
-      duration: 2500,
-      panelClass: 'atmos-snackbar'
+    this.isSavingName.set(true);
+    this.userService.updateName(trimmed).pipe(finalize(() => this.isSavingName.set(false))).subscribe({
+      next: () => {
+        this.user.update((u) => ({ ...u, name: trimmed }));
+        this.isEditingName.set(false);
+        this.snackBar.open('Nombre actualizado', 'OK', {
+          duration: 2500,
+          panelClass: 'atmos-snackbar'
+        });
+      },
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 401) {
+          this.authService.logout();
+          return;
+        }
+        this.snackBar.open(err.error?.error || 'Error al actualizar nombre', 'OK', {
+          duration: 3000,
+          panelClass: 'atmos-snackbar--warn'
+        });
+      }
     });
   }
 
@@ -192,10 +208,7 @@ export class ProfilePage implements OnInit {
         this.onStartEditName();
         break;
       case 'change-password':
-        this.snackBar.open('Recuperación de contraseña próximamente', 'OK', {
-          duration: 3000,
-          panelClass: 'atmos-snackbar'
-        });
+        this.openChangePasswordDialog();
         break;
       case 'logout':
         this.openLogoutDialog();
@@ -208,26 +221,95 @@ export class ProfilePage implements OnInit {
 
   protected onConfirmLogout(): void {
     this.dialog.closeAll();
-    this.snackBar.open('Sesión cerrada', 'OK', {
-      duration: 2500,
-      panelClass: 'atmos-snackbar'
+    this.authService.logout();
+  }
+
+  protected onSavePassword(): void {
+    const current = this.cpCurrent().trim();
+    const newPw = this.cpNew().trim();
+    const confirm = this.cpConfirm().trim();
+    const errors: string[] = [];
+
+    if (!current) errors.push('La contraseña actual es obligatoria');
+    if (newPw.length < 6) errors.push('La nueva contraseña debe tener al menos 6 caracteres');
+    if (newPw !== confirm) errors.push('Las contraseñas nuevas no coinciden');
+
+    if (errors.length) {
+      this.cpError.set(errors.join('. '));
+      return;
+    }
+
+    this.cpError.set('');
+    this.isChangingPassword.set(true);
+    this.userService.changePassword(current, newPw).pipe(finalize(() => this.isChangingPassword.set(false))).subscribe({
+      next: () => {
+        this.dialog.closeAll();
+        this.cpCurrent.set('');
+        this.cpNew.set('');
+        this.cpConfirm.set('');
+        this.snackBar.open('Contraseña actualizada correctamente', 'OK', {
+          duration: 3000,
+          panelClass: 'atmos-snackbar'
+        });
+      },
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 401) {
+          if (err.error?.error === 'Current password is incorrect') {
+            this.cpError.set('La contraseña actual es incorrecta');
+          } else {
+            this.authService.logout();
+          }
+          return;
+        }
+        this.cpError.set(err.error?.error || 'Error al cambiar contraseña');
+      }
     });
-    // Mock: navigate to onboarding
-    void this.router.navigate([`/${APP_ROUTE_PATHS.onboarding}`]);
+  }
+
+  protected onCancelPassword(): void {
+    this.dialog.closeAll();
+    this.cpCurrent.set('');
+    this.cpNew.set('');
+    this.cpConfirm.set('');
+    this.cpError.set('');
   }
 
   protected onConfirmDelete(): void {
-    this.dialog.closeAll();
-    this.snackBar.open('Cuenta eliminada. Hasta pronto.', '', {
-      duration: 3000,
-      panelClass: 'atmos-snackbar--warn'
+    const password = this.deletePassword().trim();
+    if (!password) {
+      this.deleteError.set('Ingresá tu contraseña para confirmar');
+      return;
+    }
+
+    this.deleteError.set('');
+    this.isDeleting.set(true);
+    this.userService.deleteAccount(password).pipe(finalize(() => this.isDeleting.set(false))).subscribe({
+      next: () => {
+        this.dialog.closeAll();
+        this.snackBar.open('Cuenta eliminada. Hasta pronto.', '', {
+          duration: 3000,
+          panelClass: 'atmos-snackbar--warn'
+        });
+        this.authService.logout();
+      },
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 401) {
+          if (err.error?.error === 'Password is incorrect') {
+            this.deleteError.set('La contraseña es incorrecta');
+          } else {
+            this.authService.logout();
+          }
+          return;
+        }
+        this.deleteError.set(err.error?.error || 'Error al eliminar cuenta');
+      }
     });
-    // Mock: navigate to onboarding
-    void this.router.navigate([`/${APP_ROUTE_PATHS.onboarding}`]);
   }
 
   protected onDismissDialog(): void {
     this.dialog.closeAll();
+    this.deletePassword.set('');
+    this.deleteError.set('');
   }
 
   protected trackByStat(_index: number, stat: ProfileStat): string {
@@ -247,6 +329,8 @@ export class ProfilePage implements OnInit {
   }
 
   private openDeleteDialog(): void {
+    this.deletePassword.set('');
+    this.deleteError.set('');
     this.dialog.open(this.deleteDialogRef, {
       width: '360px',
       panelClass: 'atmos-dialog',
@@ -254,23 +338,54 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  private persistProfile(): void {
-    if (typeof window === 'undefined') return;
-    const data = { displayName: this.user().displayName };
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  private openChangePasswordDialog(): void {
+    this.cpCurrent.set('');
+    this.cpNew.set('');
+    this.cpConfirm.set('');
+    this.cpError.set('');
+    this.dialog.open(this.changePasswordDialogRef, {
+      width: '400px',
+      panelClass: 'atmos-dialog',
+      autoFocus: false
+    });
   }
 
-  private restoreProfile(): void {
-    if (typeof window === 'undefined') return;
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      if (data.displayName) {
-        this.user.update((u) => ({ ...u, displayName: data.displayName }));
+  private loadProfile(): void {
+    this.authService.getProfile().subscribe({
+      next: (res: unknown) => {
+        const data = res as { user?: PublicUser };
+        const u = data.user || (res as PublicUser);
+        if (u?.name) {
+          this.user.set({
+            name: u.name,
+            email: u.email,
+            memberSince: u.created_at
+              ? new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' }).format(new Date(u.created_at))
+              : ''
+          });
+
+          if (u.created_at) {
+            const days = this.calculateDaysSince(u.created_at);
+            this.stats.update((s) =>
+              s.map((stat) => (stat.id === 'days' ? { ...stat, value: days } : stat))
+            );
+          }
+        }
       }
-    } catch {
-      // Ignore malformed storage
-    }
+    });
+
+    this.favoritesService.getAll().subscribe({
+      next: (list) => {
+        this.stats.update((s) =>
+          s.map((stat) => (stat.id === 'favorites' ? { ...stat, value: list.length } : stat))
+        );
+      }
+    });
+  }
+
+  private calculateDaysSince(dateStr: string): number {
+    const created = new Date(dateStr);
+    const now = new Date();
+    return Math.max(1, Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)));
   }
 }

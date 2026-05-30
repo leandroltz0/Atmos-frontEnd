@@ -1011,6 +1011,20 @@ app-dashboard-page {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.db-nav-btn.active {
+  color: var(--color-accent);
+  background: rgba(58, 134, 255, 0.1);
+}
+
+.db-nav-btn.active svg {
+  filter: drop-shadow(0 0 8px rgba(58, 134, 255, 0.35));
+}
+
+.db-nav-btn.active span {
+  color: var(--color-accent);
+  opacity: 0.95;
+}
+
 .db-hero:focus-visible,
 .db-refresh-btn:focus-visible,
 .db-hourly-item:focus-visible,
@@ -1051,7 +1065,7 @@ app-dashboard-page {
 @media (min-width: 640px) {
   .db-container {
     width: min(1220px, calc(100% - 2.5rem));
-    padding-top: 1.25rem;
+    padding-top: 0.75rem;
   }
 
   .db-header {
@@ -2462,4 +2476,9 @@ app-detail {
     z-index: 1;
     position: relative;
   }
+}
+
+/* ── Shared shell padding (avoids fixed navbar overlap) ── */
+app-shell main {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }

@@ -30,6 +30,7 @@ import { gsap } from 'gsap';
 
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
 import { AuthService, LoginResponse } from '../../core/services/auth.service';
+import { PreferencesService } from '../../core/services/preferences.service';
 import { AuthPreviewPanelComponent } from './components/auth-preview-panel/auth-preview-panel.component';
 
 type AuthMode = 'signin' | 'signup';
@@ -70,6 +71,7 @@ export class AuthPage implements AfterViewInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly preferencesService = inject(PreferencesService);
 
   protected readonly mode = signal<AuthMode>('signup');
   protected readonly isSubmitting = signal(false);
@@ -138,7 +140,11 @@ export class AuthPage implements AfterViewInit {
       ).subscribe({
         next: (res: LoginResponse) => {
           this.authService.saveToken(res.token);
-          void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`]);
+
+          this.preferencesService.get().subscribe({
+            next: () => void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`]),
+            error: () => void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`])
+          });
         },
         error: (error: unknown) => {
           this.submitError.set(this.getRequestErrorMessage(
@@ -158,16 +164,20 @@ export class AuthPage implements AfterViewInit {
     }).pipe(
       finalize(() => this.isSubmitting.set(false))
     ).subscribe({
-      next: (res: LoginResponse) => {
-        this.authService.saveToken(res.token);
-        void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`]);
-      },
-      error: (error: unknown) => {
-        this.submitError.set(this.getRequestErrorMessage(
-          error,
-          'No se pudo crear la cuenta. Revisá los datos o el backend.'
-        ));
-      }
+        next: (res: LoginResponse) => {
+          this.authService.saveToken(res.token);
+
+          this.preferencesService.get().subscribe({
+            next: () => void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`]),
+            error: () => void this.router.navigate([`/${APP_ROUTE_PATHS.dashboard}`])
+          });
+        },
+        error: (error: unknown) => {
+          this.submitError.set(this.getRequestErrorMessage(
+            error,
+            'No se pudo crear la cuenta. Revisá los datos o el backend.'
+          ));
+        }
     });
   }
 

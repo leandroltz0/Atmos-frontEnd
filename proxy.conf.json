@@ -3,6 +3,7 @@
     "target": "http://localhost:5008",
     "secure": false,
     "changeOrigin": true,
+    "pathRewrite": { "^/api": "" },
     "logLevel": "info"
   },
   "/cities": {

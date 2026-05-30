@@ -351,7 +351,7 @@
 // ─── Stats ───
 .profile-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.65rem;
 }
 
@@ -669,6 +669,50 @@
 
 .atmos-dialog-confirm--danger {
   background: var(--color-danger) !important;
+}
+
+.atmos-dialog-icon-wrap--accent {
+  background: rgba(58, 134, 255, 0.12);
+  border: 1px solid rgba(58, 134, 255, 0.2);
+  color: var(--color-accent);
+}
+
+.atmos-dialog-field {
+  width: 100%;
+
+  .mdc-text-field--outlined {
+    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.12);
+    --mdc-outlined-text-field-hover-outline-color: rgba(255, 255, 255, 0.22);
+    --mdc-outlined-text-field-focus-outline-color: var(--color-accent);
+    --mdc-outlined-text-field-label-text-color: var(--color-text-secondary);
+    --mdc-outlined-text-field-input-text-color: var(--color-text-primary);
+  }
+}
+
+.atmos-dialog-error {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-danger, #ef4444);
+  text-align: left;
+  width: 100%;
+}
+
+.atmos-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: atmos-spin 0.6s linear infinite;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+}
+
+@keyframes atmos-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // ─── Focus visible ───

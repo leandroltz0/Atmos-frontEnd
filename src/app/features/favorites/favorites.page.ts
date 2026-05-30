@@ -8,12 +8,18 @@ import {
   OnInit,
   ViewChild,
   computed,
+  inject,
   signal
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { catchError, combineLatest, finalize, map, of, switchMap } from 'rxjs';
 
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
+import { AuthService } from '../../core/services/auth.service';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { WeatherService } from '../../core/services/weather.service';
+import { FavoriteCity as FavoriteCityResponse } from '../../core/models/favorite.model';
 
 type SyncState = 'local' | 'synced' | 'pending';
 
@@ -189,10 +195,12 @@ export class FavoritesPage implements OnInit, OnDestroy {
   @ViewChild('comparePanel', { static: false })
   private readonly comparePanel?: ElementRef<HTMLElement>;
 
-  protected readonly favoriteCities = signal<FavoriteCity[]>([...INITIAL_FAVORITES]);
-  protected readonly selectedCityId = signal(INITIAL_FAVORITES[0]?.id ?? '');
-  protected readonly compareSelection = signal<string[]>(INITIAL_FAVORITES.slice(0, 2).map((city) => city.id));
+  protected readonly favoriteCities = signal<FavoriteCity[]>([]);
+  protected readonly selectedCityId = signal('');
+  protected readonly compareSelection = signal<string[]>([]);
   protected readonly isOffline = signal(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+  protected readonly isLoading = signal(true);
+  protected readonly error = signal<string | null>(null);
 
   protected readonly selectedCity = computed(() => {
     const cities = this.favoriteCities();
@@ -275,15 +283,21 @@ export class FavoritesPage implements OnInit, OnDestroy {
   private readonly handleOnline = () => this.isOffline.set(false);
   private readonly handleOffline = () => this.isOffline.set(true);
 
+  private readonly favoritesService = inject(FavoritesService);
+  private readonly weatherService = inject(WeatherService);
+  private readonly auth = inject(AuthService);
+  private isDestroyed = false;
+
   constructor(private readonly router: Router) {}
 
   ngOnInit(): void {
+    this.loadFavorites();
     this.bindNetworkEvents();
-    this.restoreCompareSelection();
-    this.persistCompareSelection();
   }
 
   ngOnDestroy(): void {
+    this.isDestroyed = true;
+
     if (typeof window !== 'undefined') {
       window.removeEventListener('online', this.handleOnline);
       window.removeEventListener('offline', this.handleOffline);
@@ -293,6 +307,86 @@ export class FavoritesPage implements OnInit, OnDestroy {
   @HostListener('window:resize')
   protected onResize(): void {
     // Layout is CSS-driven; listener keeps the component aligned with the rest of the app shell.
+  }
+
+  protected loadFavorites(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.favoritesService
+      .getAll()
+      .pipe(
+        switchMap((favorites) => {
+          if (favorites.length === 0) {
+            return of([]);
+          }
+
+          return combineLatest(
+            favorites.map((fav) =>
+              this.weatherService.getCurrentWeather(fav.lat, fav.lon).pipe(
+                map((weather) => this.toFavoriteCity(fav, weather)),
+                catchError(() => of(this.toFavoriteCity(fav)))
+              )
+            )
+          );
+        }),
+        catchError((err) => {
+          if (err.status === 401) {
+            this.auth.logout();
+          }
+
+          this.error.set('No pudimos cargar tus favoritos. Revisá tu conexión o intentá de nuevo.');
+          return of([]);
+        }),
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe((cities) => {
+        if (this.isDestroyed) {
+          return;
+        }
+
+        this.favoriteCities.set(cities);
+
+        if (cities.length > 0) {
+          this.selectedCityId.set(cities[0].id);
+          this.restoreCompareSelection();
+        }
+      });
+  }
+
+  private toFavoriteCity(fav: FavoriteCityResponse, weather?: any): FavoriteCity {
+    return {
+      id: fav.cityId,
+      name: fav.name,
+      country: fav.country,
+      countryCode: fav.countryCode ?? '',
+      region: fav.region ?? '',
+      temp: weather?.temperature ?? 0,
+      feelsLike: weather?.feelsLike ?? 0,
+      min: weather?.min ?? 0,
+      max: weather?.max ?? 0,
+      condition: weather?.condition ?? 'unknown',
+      conditionLabel: weather?.conditionLabel ?? '',
+      icon: weather?.icon ?? '',
+      precipChance: weather?.precipChance ?? 0,
+      humidity: weather?.humidity ?? 0,
+      windSpeed: weather?.windSpeed ?? 0,
+      windDirection: weather?.windDirection ?? '',
+      updatedMinutesAgo: 0,
+      syncState: 'synced' as SyncState,
+      accent: this.getAccentForIndex(fav.sortOrder)
+    };
+  }
+
+  private getAccentForIndex(index: number): string {
+    const accents = [
+      'rgba(58, 134, 255, 0.18)',
+      'rgba(255, 209, 102, 0.16)',
+      'rgba(72, 202, 228, 0.16)',
+      'rgba(58, 134, 255, 0.14)',
+      'rgba(27, 58, 92, 0.9)'
+    ];
+    return accents[index % accents.length];
   }
 
   protected trackByCity(_index: number, city: FavoriteCity): string {
@@ -367,12 +461,23 @@ export class FavoritesPage implements OnInit, OnDestroy {
     const [movedItem] = items.splice(index, 1);
     items.splice(nextIndex, 0, movedItem);
     this.favoriteCities.set(items);
+
+    this.favoritesService
+      .reorder(items.map((c) => c.id))
+      .pipe(
+        catchError(() => {
+          this.loadFavorites();
+          return of(null);
+        })
+      )
+      .subscribe();
   }
 
   protected onRemoveCity(city: FavoriteCity, event: MouseEvent): void {
     event.stopPropagation();
 
-    const nextCities = this.favoriteCities().filter((item) => item.id !== city.id);
+    const previous = this.favoriteCities();
+    const nextCities = previous.filter((item) => item.id !== city.id);
     this.favoriteCities.set(nextCities);
 
     const nextCompare = this.compareSelection().filter((id) => id !== city.id);
@@ -382,6 +487,16 @@ export class FavoritesPage implements OnInit, OnDestroy {
     if (this.selectedCityId() === city.id) {
       this.selectedCityId.set(nextCities[0]?.id ?? '');
     }
+
+    this.favoritesService
+      .remove(city.id)
+      .pipe(
+        catchError(() => {
+          this.favoriteCities.set(previous);
+          return of(null);
+        })
+      )
+      .subscribe();
   }
 
   protected isSelected(city: FavoriteCity): boolean {

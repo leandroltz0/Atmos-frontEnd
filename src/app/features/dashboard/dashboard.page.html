@@ -71,7 +71,9 @@
                 </svg>
                 <span>{{ currentWeather().cityName }}</span>
               </h1>
-              <span class="db-city__country">{{ currentWeather().country }}</span>
+              @if (currentWeather().country) {
+                <span class="db-city__country">{{ currentWeather().country }}</span>
+              }
             </div>
             <p class="db-date">{{ formattedDate() }}</p>
           </div>
@@ -433,11 +435,6 @@
 
       </div><!-- /db-stage -->
     </div><!-- /db-container -->
-  }
-
-  <!-- ─── QUICK NAV ────────────────────────────────── -->
-  @if (!isLoading()) {
-    <app-quick-nav />
   }
 
 </main>

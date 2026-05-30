@@ -155,6 +155,7 @@ export class AllowLocationPage implements AfterViewInit, OnDestroy {
     }
 
     this.isLocationGranted = true;
+    localStorage.setItem('atmos.locationDone', 'true');
     this.allowBtn.nativeElement.classList.add('allow-btn--granted');
     this.playGrantedButtonAnimation();
 
@@ -174,6 +175,7 @@ export class AllowLocationPage implements AfterViewInit, OnDestroy {
   }
 
   protected onSkip(): void {
+    localStorage.setItem('atmos.locationDone', 'true');
     gsap.to(this.rootRef.nativeElement, {
       opacity: 0,
       y: -20,

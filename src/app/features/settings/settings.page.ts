@@ -3,27 +3,19 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  inject,
   signal
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { catchError, EMPTY } from 'rxjs';
 
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
+import { PreferencesService } from '../../core/services/preferences.service';
+import { UserPreferences } from '../../core/models/favorite.model';
 
-type TempUnit = 'celsius' | 'fahrenheit';
-type WindUnit = 'kmh' | 'mph' | 'ms';
 type ThemeMode = 'dark' | 'light';
-type Language = 'es' | 'en';
-type TimeFormat = '12h' | '24h';
-type UpdateInterval = 10 | 30 | 60;
-
-type SettingsGroup = {
-  id: string;
-  label: string;
-  icon: string;
-  items: SettingsItem[];
-};
 
 type SettingsItem = {
   id: string;
@@ -35,7 +27,14 @@ type SettingsItem = {
   | { type: 'action'; actionLabel: string }
 );
 
-const STORAGE_KEY = 'atmos.settings';
+type SettingsGroup = {
+  id: string;
+  label: string;
+  icon: string;
+  items: SettingsItem[];
+};
+
+const THEME_STORAGE_KEY = 'atmos.theme';
 
 @Component({
   selector: 'app-settings-page',
@@ -46,87 +45,98 @@ const STORAGE_KEY = 'atmos.settings';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsPage implements OnInit {
-  protected readonly tempUnit = signal<TempUnit>('celsius');
-  protected readonly windUnit = signal<WindUnit>('kmh');
+  private readonly router = inject(Router);
+  private readonly preferencesService = inject(PreferencesService);
+
   protected readonly themeMode = signal<ThemeMode>('dark');
-  protected readonly language = signal<Language>('es');
-  protected readonly timeFormat = signal<TimeFormat>('24h');
-  protected readonly updateInterval = signal<UpdateInterval>(10);
-
-  protected readonly pushNotifications = signal(true);
-  protected readonly autoUpdate = signal(true);
-  protected readonly offlineMode = signal(false);
-
+  protected readonly isLoading = signal(true);
   protected readonly cachedCities = signal(5);
   protected readonly lastSyncLabel = signal('Hace 3 minutos');
   protected readonly appVersion = signal('1.0.0-beta');
-
   protected readonly groups = signal<SettingsGroup[]>([]);
 
-  constructor(private readonly router: Router) {}
+  constructor() {
+    this.restoreTheme();
+  }
 
   ngOnInit(): void {
-    this.restoreSettings();
-    this.buildGroups();
+    this.preferencesService.get().subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.buildGroups();
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.buildGroups();
+      }
+    });
   }
 
   protected onGoBack(): void {
     void this.router.navigate([`/${APP_ROUTE_PATHS.favorites}`]);
   }
 
-  protected onToggleChanged(groupId: string, itemId: string, checked: boolean): void {
+  protected onToggleChanged(_groupId: string, itemId: string, checked: boolean): void {
+    const patch: Partial<UserPreferences> = {};
+
     switch (itemId) {
       case 'push-notifications':
-        this.pushNotifications.set(checked);
+        patch.pushNotifications = checked;
         break;
       case 'auto-update':
-        this.autoUpdate.set(checked);
+        patch.autoUpdate = checked;
         break;
       case 'offline-mode':
-        this.offlineMode.set(checked);
+        patch.offlineMode = checked;
         break;
     }
-    this.persistSettings();
-    this.buildGroups();
+
+    if (Object.keys(patch).length > 0) {
+      this.preferencesService.update(patch).pipe(
+        catchError(() => EMPTY)
+      ).subscribe(() => this.buildGroups());
+    }
   }
 
-  protected onSelectChanged(groupId: string, itemId: string, value: string): void {
+  protected onSelectChanged(_groupId: string, itemId: string, value: string): void {
+    const patch: Partial<UserPreferences> = {};
+
     switch (itemId) {
       case 'temp-unit':
-        this.tempUnit.set(value as TempUnit);
+        patch.tempUnit = value;
         break;
       case 'wind-unit':
-        this.windUnit.set(value as WindUnit);
-        break;
-      case 'theme':
-        this.themeMode.set(value as ThemeMode);
+        patch.windUnit = value;
         break;
       case 'language':
-        this.language.set(value as Language);
+        patch.language = value;
         break;
       case 'time-format':
-        this.timeFormat.set(value as TimeFormat);
+        patch.timeFormat = value;
         break;
       case 'update-interval':
-        this.updateInterval.set(Number(value) as UpdateInterval);
+        patch.updateInterval = Number(value);
         break;
     }
-    this.persistSettings();
-    this.buildGroups();
+
+    if (Object.keys(patch).length > 0) {
+      this.preferencesService.update(patch).pipe(
+        catchError(() => EMPTY)
+      ).subscribe(() => this.buildGroups());
+    }
   }
 
-  protected onActionTriggered(groupId: string, itemId: string): void {
+  protected onActionTriggered(_groupId: string, itemId: string): void {
     switch (itemId) {
       case 'force-sync':
-        // Mock: just update the label
         this.lastSyncLabel.set('Ahora mismo');
-        this.buildGroups();
         break;
       case 'clear-cache':
         this.cachedCities.set(0);
-        this.buildGroups();
         break;
     }
+
+    this.buildGroups();
   }
 
   protected trackByGroup(_index: number, group: SettingsGroup): string {
@@ -150,6 +160,8 @@ export class SettingsPage implements OnInit {
   }
 
   private buildGroups(): void {
+    const prefs = this.preferencesService.preferences();
+
     this.groups.set([
       {
         id: 'units',
@@ -161,7 +173,7 @@ export class SettingsPage implements OnInit {
             type: 'select',
             label: 'Temperatura',
             description: 'Unidad de medida para temperatura',
-            value: this.tempUnit(),
+            value: prefs.tempUnit,
             options: [
               { value: 'celsius', label: 'Celsius (°C)' },
               { value: 'fahrenheit', label: 'Fahrenheit (°F)' }
@@ -172,11 +184,11 @@ export class SettingsPage implements OnInit {
             type: 'select',
             label: 'Velocidad del viento',
             description: 'Unidad de medida para el viento',
-            value: this.windUnit(),
+            value: prefs.windUnit,
             options: [
               { value: 'kmh', label: 'km/h' },
               { value: 'mph', label: 'mph' },
-              { value: 'ms', label: 'm/s' }  
+              { value: 'ms', label: 'm/s' }
             ]
           },
           {
@@ -184,7 +196,7 @@ export class SettingsPage implements OnInit {
             type: 'select',
             label: 'Formato de hora',
             description: 'Formato para mostrar las horas',
-            value: this.timeFormat(),
+            value: prefs.timeFormat,
             options: [
               { value: '24h', label: '24 horas' },
               { value: '12h', label: '12 horas' }
@@ -194,7 +206,7 @@ export class SettingsPage implements OnInit {
       },
       {
         id: 'appearance',
-        label: 'Apariencia',                                                                                                 
+        label: 'Apariencia',
         icon: 'palette',
         items: [
           {
@@ -202,7 +214,7 @@ export class SettingsPage implements OnInit {
             type: 'select',
             label: 'Idioma',
             description: 'Idioma de la interfaz',
-            value: this.language(),
+            value: prefs.language,
             options: [
               { value: 'es', label: 'Español' },
               { value: 'en', label: 'English' }
@@ -220,21 +232,21 @@ export class SettingsPage implements OnInit {
             type: 'toggle',
             label: 'Notificaciones push',
             description: 'Recibir alertas meteorológicas en tu dispositivo',
-            value: this.pushNotifications()
+            value: prefs.pushNotifications
           },
           {
             id: 'auto-update',
             type: 'toggle',
             label: 'Actualización automática',
             description: 'Refrescar datos del clima periódicamente',
-            value: this.autoUpdate()
+            value: prefs.autoUpdate
           },
           {
             id: 'update-interval',
             type: 'select',
             label: 'Frecuencia de actualización',
             description: 'Intervalo entre cada actualización automática',
-            value: String(this.updateInterval()),
+            value: String(prefs.updateInterval),
             options: [
               { value: '10', label: 'Cada 10 minutos' },
               { value: '30', label: 'Cada 30 minutos' },
@@ -253,7 +265,7 @@ export class SettingsPage implements OnInit {
             type: 'toggle',
             label: 'Modo offline',
             description: `${this.cachedCities()} ciudades en caché local`,
-            value: this.offlineMode()
+            value: prefs.offlineMode
           },
           {
             id: 'force-sync',
@@ -274,43 +286,16 @@ export class SettingsPage implements OnInit {
     ]);
   }
 
-  private persistSettings(): void {
-    if (typeof window === 'undefined') return;
-
-    const data = {
-      tempUnit: this.tempUnit(),
-      windUnit: this.windUnit(),
-      themeMode: this.themeMode(),
-      language: this.language(),
-      timeFormat: this.timeFormat(),
-      updateInterval: this.updateInterval(),
-      pushNotifications: this.pushNotifications(),
-      autoUpdate: this.autoUpdate(),
-      offlineMode: this.offlineMode()
-    };
-
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
-
-  private restoreSettings(): void {
+  private restoreTheme(): void {
     if (typeof window === 'undefined') return;
 
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-
-      const data = JSON.parse(raw);
-      if (data.tempUnit) this.tempUnit.set(data.tempUnit);
-      if (data.windUnit) this.windUnit.set(data.windUnit);
-      if (data.themeMode) this.themeMode.set(data.themeMode);
-      if (data.language) this.language.set(data.language);
-      if (data.timeFormat) this.timeFormat.set(data.timeFormat);
-      if (data.updateInterval) this.updateInterval.set(data.updateInterval);
-      if (data.pushNotifications !== undefined) this.pushNotifications.set(data.pushNotifications);
-      if (data.autoUpdate !== undefined) this.autoUpdate.set(data.autoUpdate);
-      if (data.offlineMode !== undefined) this.offlineMode.set(data.offlineMode);
+      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      if (stored === 'light' || stored === 'dark') {
+        this.themeMode.set(stored);
+      }
     } catch {
-      // Ignore malformed storage
+      // Ignore
     }
   }
 }

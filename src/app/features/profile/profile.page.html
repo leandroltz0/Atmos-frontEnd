@@ -40,15 +40,7 @@
           (click)="onAvatarClick()"
           aria-label="Cambiar foto de perfil"
         >
-          @if (user().avatarUrl) {
-            <img
-              [src]="user().avatarUrl"
-              [alt]="user().displayName"
-              class="profile-avatar__img"
-            />
-          } @else {
-            <span class="profile-avatar__initials">{{ getUserInitials() }}</span>
-          }
+          <span class="profile-avatar__initials">{{ getUserInitials() }}</span>
 
           <span class="profile-avatar__camera-badge" aria-hidden="true">
             <mat-icon class="profile-avatar__camera-icon">photo_camera</mat-icon>
@@ -82,7 +74,7 @@
             </div>
           </div>
         } @else {
-          <h2 class="profile-hero__name">{{ user().displayName }}</h2>
+          <h2 class="profile-hero__name">{{ user().name }}</h2>
         }
 
         <p class="profile-hero__email">
@@ -91,16 +83,6 @@
         </p>
 
         <div class="profile-hero__meta">
-          <span class="profile-provider-badge">
-            <mat-icon class="profile-provider-badge__icon">
-              @if (user().authProvider === 'google') {
-                account_circle
-              } @else {
-                vpn_key
-              }
-            </mat-icon>
-            {{ getProviderLabel() }}
-          </span>
           <span class="profile-member-badge">
             <mat-icon class="profile-member-badge__icon">event</mat-icon>
             Desde {{ user().memberSince }}
@@ -246,12 +228,99 @@
       <p class="atmos-dialog-body">
         Esta acción es <strong>permanente e irreversible</strong>. Se eliminarán todos tus datos: favoritos, alertas y preferencias.
       </p>
+      <mat-form-field appearance="outline" class="atmos-dialog-field">
+        <mat-label>Contraseña actual</mat-label>
+        <input
+          matInput
+          type="password"
+          [value]="deletePassword()"
+          (input)="deletePassword.set($any($event.target).value)"
+          (keydown.enter)="onConfirmDelete()"
+          autocomplete="current-password"
+        />
+      </mat-form-field>
+      @if (deleteError()) {
+        <p class="atmos-dialog-error" role="alert">{{ deleteError() }}</p>
+      }
       <div class="atmos-dialog-actions">
         <button mat-button class="atmos-dialog-cancel" (click)="onDismissDialog()">
           Cancelar
         </button>
-        <button mat-flat-button class="atmos-dialog-confirm atmos-dialog-confirm--danger" (click)="onConfirmDelete()">
+        <button
+          mat-flat-button
+          class="atmos-dialog-confirm atmos-dialog-confirm--danger"
+          [disabled]="isDeleting()"
+          (click)="onConfirmDelete()"
+        >
+          @if (isDeleting()) {
+            <span class="atmos-spinner"></span>
+          }
           Eliminar cuenta
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- ─── Change Password Dialog ─── -->
+  <ng-template #changePasswordDialog>
+    <div class="atmos-dialog-content">
+      <div class="atmos-dialog-icon-wrap atmos-dialog-icon-wrap--accent">
+        <mat-icon class="atmos-dialog-icon">lock</mat-icon>
+      </div>
+      <h2 class="atmos-dialog-title">Cambiar contraseña</h2>
+
+      <mat-form-field appearance="outline" class="atmos-dialog-field">
+        <mat-label>Contraseña actual</mat-label>
+        <input
+          matInput
+          type="password"
+          [value]="cpCurrent()"
+          (input)="cpCurrent.set($any($event.target).value)"
+          autocomplete="current-password"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="atmos-dialog-field">
+        <mat-label>Nueva contraseña</mat-label>
+        <input
+          matInput
+          type="password"
+          [value]="cpNew()"
+          (input)="cpNew.set($any($event.target).value)"
+          autocomplete="new-password"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="atmos-dialog-field">
+        <mat-label>Confirmar nueva contraseña</mat-label>
+        <input
+          matInput
+          type="password"
+          [value]="cpConfirm()"
+          (input)="cpConfirm.set($any($event.target).value)"
+          (keydown.enter)="onSavePassword()"
+          autocomplete="new-password"
+        />
+      </mat-form-field>
+
+      @if (cpError()) {
+        <p class="atmos-dialog-error" role="alert">{{ cpError() }}</p>
+      }
+
+      <div class="atmos-dialog-actions">
+        <button mat-button class="atmos-dialog-cancel" (click)="onCancelPassword()">
+          Cancelar
+        </button>
+        <button
+          mat-flat-button
+          class="atmos-dialog-confirm"
+          [disabled]="isChangingPassword()"
+          (click)="onSavePassword()"
+        >
+          @if (isChangingPassword()) {
+            <span class="atmos-spinner"></span>
+          }
+          Guardar
         </button>
       </div>
     </div>

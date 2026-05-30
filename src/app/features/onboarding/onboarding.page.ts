@@ -108,6 +108,7 @@ export class OnboardingPage implements AfterViewInit, OnDestroy {
   }
 
   protected onGetStarted(): void {
+    localStorage.setItem('atmos.onboardingDone', 'true');
     void this.router.navigate([`/${APP_ROUTE_PATHS.allowLocation}`]);
   }
 
