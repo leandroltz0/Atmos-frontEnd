@@ -1,0 +1,42 @@
+.auth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0;
+
+  @media (min-width: 980px) {
+    margin-bottom: 0.7rem;
+    padding: 0.1rem 0;
+  }
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-brand__mark {
+  display: grid;
+  grid-template-columns: repeat(2, 8px);
+  gap: 4px;
+}
+
+.auth-brand__mark span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(58, 134, 255, 0.95), rgba(72, 202, 228, 0.72));
+  box-shadow: 0 0 14px rgba(58, 134, 255, 0.25);
+}
+
+.auth-brand__name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}

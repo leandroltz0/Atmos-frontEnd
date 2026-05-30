@@ -72,30 +72,6 @@ export function getTempRange(days: DailyForecast[]): { max: number; min: number 
   };
 }
 
-export function getRefreshedWeatherSnapshot(
-  current: CurrentWeather,
-  hourlyForecast: HourlyForecast[],
-  now: Date
-): { current: CurrentWeather; hourlyForecast: HourlyForecast[] } {
-  const tempDelta = current.temp >= 20 ? -1 : 1;
-
-  return {
-    current: {
-      ...current,
-      temp: clampValue(current.temp + tempDelta, 7, 33),
-      feelsLike: clampValue(current.feelsLike + tempDelta, 6, 35),
-      humidity: clampValue(current.humidity - 2, 42, 92),
-      windSpeed: clampValue(current.windSpeed + 1, 4, 40),
-      pressure: clampValue(current.pressure - 1, 995, 1035),
-      lastUpdated: now
-    },
-    hourlyForecast: hourlyForecast.map((item, index) => ({
-      ...item,
-      temp: index < 8 ? clampValue(item.temp + tempDelta, 6, 34) : item.temp
-    }))
-  };
-}
-
 export function clampValue(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }

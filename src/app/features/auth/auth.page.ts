@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   AfterViewInit,
@@ -11,31 +10,21 @@ import {
 } from '@angular/core';
 import { finalize } from 'rxjs';
 import {
-  AbstractControl,
   FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { gsap } from 'gsap';
 
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
 import { AuthService, LoginResponse } from '../../core/services/auth.service';
 import { PreferencesService } from '../../core/services/preferences.service';
+import { AuthBackgroundComponent } from '../../components/auth/auth-background/auth-background.component';
+import { AuthTopbarComponent } from '../../components/auth/auth-topbar/auth-topbar.component';
+import { AuthFormPanelComponent } from '../../components/auth/auth-form-panel/auth-form-panel.component';
 import { AuthPreviewPanelComponent } from './components/auth-preview-panel/auth-preview-panel.component';
 
-type AuthMode = 'signin' | 'signup';
-
-const passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+const passwordMatchValidator = (control: { get: (key: string) => { value: unknown } | null }): Record<string, boolean> | null => {
   const password = control.get('password')?.value;
   const confirmPassword = control.get('confirmPassword')?.value;
 
@@ -46,19 +35,15 @@ const passwordMatchValidator: ValidatorFn = (control: AbstractControl): Validati
   return password === confirmPassword ? null : { passwordMismatch: true };
 };
 
+type AuthMode = 'signin' | 'signup';
+
 @Component({
   selector: 'app-auth-page',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
+    AuthBackgroundComponent,
+    AuthTopbarComponent,
+    AuthFormPanelComponent,
     AuthPreviewPanelComponent
   ],
   templateUrl: './auth.page.html',
@@ -76,9 +61,6 @@ export class AuthPage implements AfterViewInit {
   protected readonly mode = signal<AuthMode>('signup');
   protected readonly isSubmitting = signal(false);
   protected readonly submitError = signal<string | null>(null);
-  protected readonly hideSignInPassword = signal(true);
-  protected readonly hideSignUpPassword = signal(true);
-  protected readonly hideConfirmPassword = signal(true);
 
   protected readonly signInForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -192,27 +174,6 @@ export class AuthPage implements AfterViewInit {
       this.isSubmitting.set(false);
       void this.router.navigate([`/${APP_ROUTE_PATHS.allowLocation}`]);
     }, 700);
-  }
-
-  protected toggleSignInPasswordVisibility(): void {
-    this.hideSignInPassword.update((value) => !value);
-  }
-
-  protected toggleSignUpPasswordVisibility(): void {
-    this.hideSignUpPassword.update((value) => !value);
-  }
-
-  protected toggleConfirmPasswordVisibility(): void {
-    this.hideConfirmPassword.update((value) => !value);
-  }
-
-  protected shouldShowControlError(control: AbstractControl | null): boolean {
-    return !!control && control.invalid && (control.touched || control.dirty);
-  }
-
-  protected getPasswordMismatchError(): boolean {
-    return this.signUpForm.hasError('passwordMismatch')
-      && this.shouldShowControlError(this.signUpForm.controls.confirmPassword);
   }
 
   private getRequestErrorMessage(error: unknown, fallbackMessage: string): string {

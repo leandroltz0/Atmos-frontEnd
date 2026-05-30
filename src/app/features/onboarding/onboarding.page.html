@@ -1,30 +1,12 @@
 <main class="onboarding-shell">
-  <canvas #bgCanvas class="bg-canvas" aria-hidden="true"></canvas>
+  <app-background-starfield />
 
   <section class="onboarding-layout">
     <div class="globe-panel">
       <div class="globe-aura" aria-hidden="true"></div>
-      <div #globeScene class="globe-scene">
-        <canvas #globeCanvas class="globe-canvas" aria-label="Rotating globe"></canvas>
-      </div>
+      <app-globe-scene />
     </div>
 
-    <div class="content-panel">
-      <p class="eyebrow atmos-kicker">Welcome to</p>
-      <h1 class="title">ATMOS</h1>
-      <p class="description atmos-body-copy">
-        We're here to keep you updated on the weather,
-        so you can plan your day without surprises.
-      </p>
-
-      <button
-        mat-flat-button
-        type="button"
-        class="cta-button atmos-primary-btn"
-        (click)="onGetStarted()"
-      >
-        Get Started
-      </button>
-    </div>
+    <app-content-panel class="content-panel" (getStarted)="onGetStarted()" />
   </section>
 </main>

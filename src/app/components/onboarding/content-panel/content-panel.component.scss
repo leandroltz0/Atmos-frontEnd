@@ -1,0 +1,70 @@
+.eyebrow {
+  margin: 0;
+}
+
+.title {
+  margin: 0.55rem 0 1rem;
+  font-family: var(--atmos-font-display);
+  font-size: 3.25rem;
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  color: var(--atmos-text-primary);
+  text-shadow: 0 8px 32px rgba(15, 23, 42, 0.35);
+}
+
+.description {
+  max-width: 28rem;
+  margin: 0;
+  font-size: 1rem;
+  text-wrap: balance;
+}
+
+.cta-button.mat-mdc-unelevated-button {
+  width: 80%;
+  max-width: 30rem;
+  min-height: 4.5rem;
+  margin-top: 2rem;
+  padding-inline: 1.25rem;
+}
+
+.cta-button.mat-mdc-unelevated-button .mdc-button__label {
+  font-size: 0.96rem;
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .title {
+    font-size: 4rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .cta-button.mat-mdc-unelevated-button {
+    width: 80%;
+    max-width: 28rem;
+    margin-top: 2.4rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .eyebrow {
+    font-size: 1.02rem;
+  }
+
+  .title {
+    font-size: 4.25rem;
+  }
+
+  .description {
+    max-width: 28rem;
+    font-size: 1.0625rem;
+  }
+
+  .cta-button.mat-mdc-unelevated-button {
+    width: 250px;
+    max-width: none;
+    margin-top: 2.5rem;
+  }
+}

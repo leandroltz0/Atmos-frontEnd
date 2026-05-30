@@ -1,0 +1,42 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.auth-background,
+.auth-background__grid {
+  position: absolute;
+  inset: 0;
+}
+
+.auth-background__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+}
+
+.auth-background__orb--primary {
+  width: min(42rem, 58vw);
+  height: min(42rem, 58vw);
+  top: -14rem;
+  right: -12rem;
+  background: radial-gradient(circle, rgba(58, 134, 255, 0.22), transparent 68%);
+}
+
+.auth-background__orb--info {
+  width: min(28rem, 38vw);
+  height: min(28rem, 38vw);
+  bottom: -10rem;
+  left: -8rem;
+  background: radial-gradient(circle, rgba(72, 202, 228, 0.16), transparent 70%);
+}
+
+.auth-background__grid {
+  opacity: 0.32;
+  background-image:
+    linear-gradient(rgba(139, 174, 200, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 174, 200, 0.06) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.88), transparent 84%);
+}
