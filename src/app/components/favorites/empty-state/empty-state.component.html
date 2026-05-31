@@ -1,0 +1,19 @@
+<div class="favorites-empty">
+  <div class="favorites-empty__icon-shell" aria-hidden="true">
+    <svg viewBox="0 0 64 64" fill="none" class="favorites-empty__icon">
+      <path d="M32 10C24.2 10 18 16.2 18 24c0 9 8.2 17.4 12.4 21.3a1.9 1.9 0 002.6 0C37.2 41.4 46 33 46 24c0-7.8-6.2-14-14-14Z" fill="currentColor" opacity="0.14"/>
+      <path d="M32 18a6 6 0 100 12 6 6 0 000-12Z" stroke="currentColor" stroke-width="2"/>
+      <path d="M14 47c5.6-4.7 12.7-7.5 18-7.5S42.4 42.3 50 47" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+    </svg>
+  </div>
+  <p class="favorites-empty__title">No hay ciudades guardadas</p>
+  <p class="favorites-empty__body">Buscá una ciudad y agregala para empezar a armar tu lista.</p>
+  <div class="favorites-empty__actions">
+    <button mat-flat-button type="button" class="favorites-primary-btn" (click)="onAddCity()">
+      Buscar ciudad
+    </button>
+    <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="onRestoreDemo()">
+      Restaurar demo
+    </button>
+  </div>
+</div>

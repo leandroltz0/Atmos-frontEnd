@@ -1,0 +1,15 @@
+<section class="favorites-metrics" aria-label="Resumen rápido">
+  @for (metric of metrics(); track metric.label) {
+    <article
+      class="metric-card"
+      [class.metric-card--accent]="metric.tone === 'accent'"
+      [class.metric-card--info]="metric.tone === 'info'"
+      [class.metric-card--sun]="metric.tone === 'sun'"
+      [class.metric-card--success]="metric.tone === 'success'"
+    >
+      <span class="metric-card__label">{{ metric.label }}</span>
+      <strong class="metric-card__value font-mono">{{ metric.value }}</strong>
+      <span class="metric-card__helper">{{ metric.helper }}</span>
+    </article>
+  }
+</section>

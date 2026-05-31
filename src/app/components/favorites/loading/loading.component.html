@@ -1,0 +1,16 @@
+<div class="favorites-loading" aria-busy="true" aria-label="Cargando favoritos">
+  <div class="favorites-loading__metrics">
+    @for (i of [1, 2, 3, 4]; track i) {
+      <div class="glass-card pulse favorites-loading__stat"></div>
+    }
+  </div>
+
+  <div class="favorites-loading__layout">
+    <div class="favorites-loading__list">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="glass-card pulse favorites-loading__card"></div>
+      }
+    </div>
+    <div class="glass-card pulse favorites-loading__panel"></div>
+  </div>
+</div>

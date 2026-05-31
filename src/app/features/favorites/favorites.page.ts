@@ -12,7 +12,6 @@ import {
   signal
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
 import { catchError, combineLatest, finalize, map, of, switchMap } from 'rxjs';
 
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
@@ -20,37 +19,16 @@ import { AuthService } from '../../core/services/auth.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { WeatherService } from '../../core/services/weather.service';
 import { FavoriteCity as FavoriteCityResponse } from '../../core/models/favorite.model';
+import { FavoriteCity, FavoriteMetric, SyncState } from './favorites.types';
 
-type SyncState = 'local' | 'synced' | 'pending';
-
-type FavoriteCity = {
-  id: string;
-  name: string;
-  country: string;
-  countryCode: string;
-  region: string;
-  temp: number;
-  feelsLike: number;
-  min: number;
-  max: number;
-  condition: string;
-  conditionLabel: string;
-  icon: string;
-  precipChance: number;
-  humidity: number;
-  windSpeed: number;
-  windDirection: string;
-  updatedMinutesAgo: number;
-  syncState: SyncState;
-  accent: string;
-};
-
-type FavoriteMetric = {
-  label: string;
-  value: string;
-  helper: string;
-  tone: 'accent' | 'info' | 'sun' | 'success';
-};
+import { FavoritesBackgroundComponent } from '../../components/favorites/background/background.component';
+import { FavoritesHeaderComponent } from '../../components/favorites/header/header.component';
+import { FavoritesLoadingComponent } from '../../components/favorites/loading/loading.component';
+import { FavoritesErrorComponent } from '../../components/favorites/error/error.component';
+import { FavoritesMetricsComponent } from '../../components/favorites/metrics/metrics.component';
+import { FavoritesCityCardComponent } from '../../components/favorites/city-card/city-card.component';
+import { FavoritesSelectedCardComponent } from '../../components/favorites/selected-card/selected-card.component';
+import { FavoritesEmptyStateComponent } from '../../components/favorites/empty-state/empty-state.component';
 
 type ComparisonMetric = {
   label: string;
@@ -186,7 +164,17 @@ const FAVORITE_STORAGE_KEY = 'atmos.favorites.compare';
 @Component({
   selector: 'app-favorites-page',
   standalone: true,
-  imports: [CommonModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    FavoritesBackgroundComponent,
+    FavoritesHeaderComponent,
+    FavoritesLoadingComponent,
+    FavoritesErrorComponent,
+    FavoritesMetricsComponent,
+    FavoritesCityCardComponent,
+    FavoritesSelectedCardComponent,
+    FavoritesEmptyStateComponent
+  ],
   templateUrl: './favorites.page.html',
   styleUrl: './favorites.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -389,18 +377,6 @@ export class FavoritesPage implements OnInit, OnDestroy {
     return accents[index % accents.length];
   }
 
-  protected trackByCity(_index: number, city: FavoriteCity): string {
-    return city.id;
-  }
-
-  protected trackByMetric(_index: number, metric: FavoriteMetric): string {
-    return metric.label;
-  }
-
-  protected trackByComparison(_index: number, comparison: ComparisonResult): string {
-    return comparison.city.id;
-  }
-
   protected onAddCity(): void {
     void this.router.navigate([`/${APP_ROUTE_PATHS.search}`]);
   }
@@ -518,17 +494,6 @@ export class FavoritesPage implements OnInit, OnDestroy {
       behavior: this.prefersReducedMotion() ? 'auto' : 'smooth',
       block: 'start'
     });
-  }
-
-  protected getSyncLabel(state: SyncState): string {
-    switch (state) {
-      case 'synced':
-        return 'Sincronizada';
-      case 'pending':
-        return 'Pendiente';
-      default:
-        return 'Local';
-    }
   }
 
   protected getDifferenceLabel(city: FavoriteCity): string {

@@ -1,0 +1,47 @@
+:host {
+  display: contents;
+}
+
+.favorites-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.favorites-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+}
+
+.favorites-bg__orb--1 {
+  width: 62vw;
+  height: 62vw;
+  max-width: 520px;
+  max-height: 520px;
+  top: -14%;
+  right: -12%;
+  background: radial-gradient(circle, rgba(58, 134, 255, 0.16) 0%, transparent 72%);
+}
+
+.favorites-bg__orb--2 {
+  width: 48vw;
+  height: 48vw;
+  max-width: 380px;
+  max-height: 380px;
+  bottom: 14%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(72, 202, 228, 0.12) 0%, transparent 72%);
+}
+
+.favorites-bg__orb--3 {
+  width: 28vw;
+  height: 28vw;
+  max-width: 240px;
+  max-height: 240px;
+  top: 40%;
+  left: 52%;
+  background: radial-gradient(circle, rgba(255, 209, 102, 0.11) 0%, transparent 72%);
+}

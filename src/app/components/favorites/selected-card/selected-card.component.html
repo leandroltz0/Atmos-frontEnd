@@ -1,0 +1,72 @@
+@if (city(); as c) {
+  <section class="selected-card" aria-label="Detalle rápido de la ciudad seleccionada">
+    <div class="selected-card__header">
+      <div>
+        <p class="selected-card__eyebrow">Ciudad activa</p>
+        <h2 class="selected-card__title">{{ c.name }}, {{ c.country }}</h2>
+      </div>
+      <span
+        class="status-chip"
+        [class.status-chip--local]="c.syncState === 'local'"
+        [class.status-chip--pending]="c.syncState === 'pending'"
+        [class.status-chip--synced]="c.syncState === 'synced'"
+      >
+        {{ getSyncLabel(c.syncState) }}
+      </span>
+    </div>
+
+    <div class="selected-card__hero">
+      <div class="selected-card__icon-shell" [style.background]="c.accent">
+        <img [src]="c.icon" [alt]="c.conditionLabel" class="selected-card__icon" />
+      </div>
+
+      <div class="selected-card__temperature">
+        <div class="selected-card__temp-row">
+          <span class="selected-card__temp font-display">{{ c.temp }}</span>
+          <span class="selected-card__temp-unit font-display">°</span>
+        </div>
+        <p class="selected-card__condition">{{ c.conditionLabel }}</p>
+        <p class="selected-card__range">Sensación {{ c.feelsLike }}° · hace {{ c.updatedMinutesAgo }} min</p>
+      </div>
+    </div>
+
+    <div class="selected-card__metrics">
+      <div class="selected-card__metric">
+        <span class="selected-card__metric-label">Sensación</span>
+        <strong class="selected-card__metric-value font-mono">{{ c.feelsLike }}°</strong>
+      </div>
+
+      <div class="selected-card__metric">
+        <span class="selected-card__metric-label">Humedad</span>
+        <strong class="selected-card__metric-value font-mono">{{ c.humidity }}%</strong>
+      </div>
+
+      <div class="selected-card__metric">
+        <span class="selected-card__metric-label">Viento</span>
+        <strong class="selected-card__metric-value font-mono">{{ c.windSpeed }} km/h</strong>
+      </div>
+
+      <div class="selected-card__metric">
+        <span class="selected-card__metric-label">Rango</span>
+        <strong class="selected-card__metric-value font-mono">{{ c.min }}° / {{ c.max }}°</strong>
+      </div>
+    </div>
+
+    <div class="selected-card__actions">
+      <button mat-flat-button type="button" class="favorites-primary-btn" (click)="onViewDetail()">
+        Ver detalle
+      </button>
+      <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="onGoToCompare()">
+        Ir a comparación
+      </button>
+    </div>
+  </section>
+} @else {
+  <section class="selected-card selected-card--empty" aria-label="Sin ciudad seleccionada">
+    <p class="selected-card__eyebrow">Ciudad activa</p>
+    <h2 class="selected-card__title">Seleccioná una ciudad</h2>
+    <p class="selected-card__empty-copy">
+      Tocá cualquier ciudad de la lista para ver su resumen rápido acá.
+    </p>
+  </section>
+}

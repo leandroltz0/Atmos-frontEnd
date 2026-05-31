@@ -1,0 +1,18 @@
+<header class="favorites-header">
+  <div class="favorites-header__copy">
+    <p class="favorites-eyebrow">Acceso rápido</p>
+    <h1 class="favorites-title">Favoritos</h1>
+    <p class="favorites-subtitle">
+      Guardá ciudades, reordená la lista y compará las que mirás todos los días.
+    </p>
+  </div>
+
+  <div class="favorites-header__actions">
+    <button mat-flat-button type="button" class="favorites-primary-btn" (click)="onAddCity()">
+      Agregar ciudad
+    </button>
+    <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="onScrollToCompare()">
+      Comparar
+    </button>
+  </div>
+</header>

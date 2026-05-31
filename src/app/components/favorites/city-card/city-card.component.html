@@ -1,0 +1,121 @@
+<article
+  class="favorite-card"
+  [class.favorite-card--selected]="selected()"
+  tabindex="0"
+  role="button"
+  (click)="onSelect()"
+  (keydown.enter)="onSelect()"
+  (keydown.space)="$event.preventDefault(); onSelect()"
+  [attr.aria-label]="'Ver detalle de ' + city().name + ', ' + city().country"
+>
+  <div class="favorite-card__accent" [style.background]="city().accent"></div>
+
+  <div class="favorite-card__top">
+    <div class="favorite-card__identity">
+      <div class="favorite-card__icon-shell" [style.background]="city().accent">
+        <img [src]="city().icon" [alt]="city().conditionLabel" class="favorite-card__icon" />
+      </div>
+
+      <div class="favorite-card__copy">
+        <h3 class="favorite-card__name">{{ city().name }}</h3>
+        <p class="favorite-card__region">{{ city().region }}, {{ city().country }} · {{ city().countryCode }}</p>
+      </div>
+    </div>
+
+    <div class="favorite-card__status">
+      <span
+        class="status-chip"
+        [class.status-chip--local]="city().syncState === 'local'"
+        [class.status-chip--pending]="city().syncState === 'pending'"
+        [class.status-chip--synced]="city().syncState === 'synced'"
+      >
+        {{ getSyncLabel(city().syncState) }}
+      </span>
+      <span class="favorite-card__updated">hace {{ city().updatedMinutesAgo }} min</span>
+    </div>
+  </div>
+
+  <div class="favorite-card__body">
+    <div class="favorite-card__temperature">
+      <div class="favorite-card__temp-row">
+        <span class="favorite-card__temp font-display">{{ city().temp }}</span>
+        <span class="favorite-card__temp-unit font-display">°</span>
+      </div>
+      <p class="favorite-card__condition">{{ city().conditionLabel }}</p>
+      <p class="favorite-card__range">
+        Sensación {{ city().feelsLike }}°, min {{ city().min }}° / max {{ city().max }}°
+      </p>
+    </div>
+
+    <div class="favorite-card__stats" aria-label="Datos rápidos">
+      <div class="favorite-card__stat">
+        <span class="favorite-card__stat-label">Humedad</span>
+        <strong class="favorite-card__stat-value font-mono">{{ city().humidity }}%</strong>
+      </div>
+
+      <div class="favorite-card__stat">
+        <span class="favorite-card__stat-label">Viento</span>
+        <strong class="favorite-card__stat-value font-mono">{{ city().windSpeed }} km/h</strong>
+      </div>
+
+      <div class="favorite-card__stat">
+        <span class="favorite-card__stat-label">Dir.</span>
+        <strong class="favorite-card__stat-value font-mono">{{ city().windDirection }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="favorite-card__actions" aria-label="Acciones de ciudad favorita">
+    <button
+      mat-stroked-button
+      type="button"
+      class="favorite-card__compare-btn"
+      [class.favorite-card__compare-btn--active]="compared()"
+      (click)="onToggleCompare($event)"
+    >
+      @if (compared()) {
+        Quitar de comparar
+      } @else {
+        Comparar
+      }
+    </button>
+
+    <div class="favorite-card__actions-row">
+      <button
+        mat-icon-button
+        type="button"
+        class="favorite-card__icon-btn"
+        (click)="onMoveUp($event)"
+        [attr.aria-label]="'Mover ' + city().name + ' hacia arriba'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" class="favorite-card__action-icon" aria-hidden="true">
+          <path d="M12 5l-6 6m6-6l6 6M12 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="favorite-card__icon-btn"
+        (click)="onMoveDown($event)"
+        [attr.aria-label]="'Mover ' + city().name + ' hacia abajo'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" class="favorite-card__action-icon" aria-hidden="true">
+          <path d="M12 19l-6-6m6 6l6-6M12 19V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="favorite-card__icon-btn favorite-card__icon-btn--danger"
+        (click)="onRemove($event)"
+        [attr.aria-label]="'Quitar ' + city().name + ' de favoritos'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" class="favorite-card__action-icon" aria-hidden="true">
+          <path d="M5 7h14M10 7V5.5A1.5 1.5 0 0111.5 4h1A1.5 1.5 0 0114 5.5V7m-5 0h6m-7 0l.5 12.5A1.5 1.5 0 0010 21h4a1.5 1.5 0 001.5-1.5L16 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</article>

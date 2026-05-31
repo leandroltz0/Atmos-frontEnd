@@ -1,29 +1,11 @@
 <main class="favorites-shell font-body" role="main" [attr.aria-busy]="isLoading()">
-  <div class="favorites-bg" aria-hidden="true">
-    <div class="favorites-bg__orb favorites-bg__orb--1"></div>
-    <div class="favorites-bg__orb favorites-bg__orb--2"></div>
-    <div class="favorites-bg__orb favorites-bg__orb--3"></div>
-  </div>
+  <app-favorites-background />
 
   <div class="favorites-container">
-    <header class="favorites-header">
-      <div class="favorites-header__copy">
-        <p class="favorites-eyebrow">Acceso rápido</p>
-        <h1 class="favorites-title">Favoritos</h1>
-        <p class="favorites-subtitle">
-          Guardá ciudades, reordená la lista y compará las que mirás todos los días.
-        </p>
-      </div>
-
-      <div class="favorites-header__actions">
-        <button mat-flat-button type="button" class="favorites-primary-btn" (click)="onAddCity()">
-          Agregar ciudad
-        </button>
-        <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="scrollToComparePanel()">
-          Comparar
-        </button>
-      </div>
-    </header>
+    <app-favorites-header
+      (addCity)="onAddCity()"
+      (scrollToCompare)="scrollToComparePanel()"
+    />
 
     @if (isOffline()) {
       <div class="favorites-banner" role="alert" aria-live="assertive">
@@ -39,51 +21,15 @@
     }
 
     @if (isLoading()) {
-      <div class="favorites-loading" aria-busy="true" aria-label="Cargando favoritos">
-        <div class="favorites-loading__metrics">
-          @for (i of [1, 2, 3, 4]; track i) {
-            <div class="glass-card pulse favorites-loading__stat"></div>
-          }
-        </div>
-
-        <div class="favorites-loading__layout">
-          <div class="favorites-loading__list">
-            @for (i of [1, 2, 3]; track i) {
-              <div class="glass-card pulse favorites-loading__card"></div>
-            }
-          </div>
-          <div class="glass-card pulse favorites-loading__panel"></div>
-        </div>
-      </div>
+      <app-favorites-loading />
     } @else if (error()) {
-      <div class="favorites-error" role="alert" aria-live="assertive">
-        <div class="favorites-error__icon-shell" aria-hidden="true">
-          <svg viewBox="0 0 64 64" fill="none" class="favorites-error__icon">
-            <circle cx="32" cy="32" r="24" stroke="currentColor" stroke-width="2" opacity="0.2"/>
-            <path d="M32 20v14M32 40v2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <p class="favorites-error__title">Ocurrió un error</p>
-        <p class="favorites-error__body">{{ error() }}</p>
-        <div class="favorites-error__actions">
-          <button mat-flat-button type="button" class="favorites-primary-btn" (click)="loadFavorites()">
-            Reintentar
-          </button>
-          <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="onRestoreDemo()">
-            Restaurar demo
-          </button>
-        </div>
-      </div>
+      <app-favorites-error
+        [errorMessage]="error() ?? ''"
+        (retry)="loadFavorites()"
+        (restoreDemo)="onRestoreDemo()"
+      />
     } @else {
-      <section class="favorites-metrics" aria-label="Resumen rápido">
-      @for (metric of metrics(); track metric.label) {
-        <article class="metric-card" [class.metric-card--accent]="metric.tone === 'accent'" [class.metric-card--info]="metric.tone === 'info'" [class.metric-card--sun]="metric.tone === 'sun'" [class.metric-card--success]="metric.tone === 'success'">
-          <span class="metric-card__label">{{ metric.label }}</span>
-          <strong class="metric-card__value font-mono">{{ metric.value }}</strong>
-          <span class="metric-card__helper">{{ metric.helper }}</span>
-        </article>
-      }
-    </section>
+      <app-favorites-metrics [metrics]="metrics()" />
 
     <section class="favorites-layout">
       <div class="favorites-list-column">
@@ -98,215 +44,32 @@
         @if (favoriteCities().length > 0) {
           <div class="favorites-list">
             @for (city of favoriteCities(); track city.id) {
-              <article
-                class="favorite-card"
-                [class.favorite-card--selected]="isSelected(city)"
-                tabindex="0"
-                role="button"
-                (click)="onSelectCity(city)"
-                (keydown.enter)="onSelectCity(city)"
-                (keydown.space)="$event.preventDefault(); onSelectCity(city)"
-                [attr.aria-label]="'Ver detalle de ' + city.name + ', ' + city.country"
-              >
-                <div class="favorite-card__accent" [style.background]="city.accent"></div>
-
-                <div class="favorite-card__top">
-                  <div class="favorite-card__identity">
-                    <div class="favorite-card__icon-shell" [style.background]="city.accent">
-                      <img [src]="city.icon" [alt]="city.conditionLabel" class="favorite-card__icon" />
-                    </div>
-
-                    <div class="favorite-card__copy">
-                      <h3 class="favorite-card__name">{{ city.name }}</h3>
-                      <p class="favorite-card__region">{{ city.region }}, {{ city.country }} · {{ city.countryCode }}</p>
-                    </div>
-                  </div>
-
-                  <div class="favorite-card__status">
-                    <span class="status-chip" [class.status-chip--local]="city.syncState === 'local'" [class.status-chip--pending]="city.syncState === 'pending'" [class.status-chip--synced]="city.syncState === 'synced'">
-                      {{ getSyncLabel(city.syncState) }}
-                    </span>
-                    <span class="favorite-card__updated">hace {{ city.updatedMinutesAgo }} min</span>
-                  </div>
-                </div>
-
-                <div class="favorite-card__body">
-                  <div class="favorite-card__temperature">
-                    <div class="favorite-card__temp-row">
-                      <span class="favorite-card__temp font-display">{{ city.temp }}</span>
-                      <span class="favorite-card__temp-unit font-display">°</span>
-                    </div>
-                    <p class="favorite-card__condition">{{ city.conditionLabel }}</p>
-                    <p class="favorite-card__range">
-                      Sensación {{ city.feelsLike }}°, min {{ city.min }}° / max {{ city.max }}°
-                    </p>
-                  </div>
-
-                  <div class="favorite-card__stats" aria-label="Datos rápidos">
-                    <div class="favorite-card__stat">
-                      <span class="favorite-card__stat-label">Humedad</span>
-                      <strong class="favorite-card__stat-value font-mono">{{ city.humidity }}%</strong>
-                    </div>
-
-                    <div class="favorite-card__stat">
-                      <span class="favorite-card__stat-label">Viento</span>
-                      <strong class="favorite-card__stat-value font-mono">{{ city.windSpeed }} km/h</strong>
-                    </div>
-
-                    <div class="favorite-card__stat">
-                      <span class="favorite-card__stat-label">Dir.</span>
-                      <strong class="favorite-card__stat-value font-mono">{{ city.windDirection }}</strong>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="favorite-card__actions" aria-label="Acciones de ciudad favorita">
-                  <button
-                    mat-stroked-button
-                    type="button"
-                    class="favorite-card__compare-btn"
-                    [class.favorite-card__compare-btn--active]="isCompared(city)"
-                    (click)="onToggleCompare(city, $event)"
-                  >
-                    @if (isCompared(city)) {
-                      Quitar de comparar
-                    } @else {
-                      Comparar
-                    }
-                  </button>
-
-                  <div class="favorite-card__actions-row">
-                    <button
-                      mat-icon-button
-                      type="button"
-                      class="favorite-card__icon-btn"
-                      (click)="onMoveCity(city, -1, $event)"
-                      [attr.aria-label]="'Mover ' + city.name + ' hacia arriba'"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" class="favorite-card__action-icon" aria-hidden="true">
-                        <path d="M12 5l-6 6m6-6l6 6M12 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </button>
-
-                    <button
-                      mat-icon-button
-                      type="button"
-                      class="favorite-card__icon-btn"
-                      (click)="onMoveCity(city, 1, $event)"
-                      [attr.aria-label]="'Mover ' + city.name + ' hacia abajo'"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" class="favorite-card__action-icon" aria-hidden="true">
-                        <path d="M12 19l-6-6m6 6l6-6M12 19V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </button>
-
-                    <button
-                      mat-icon-button
-                      type="button"
-                      class="favorite-card__icon-btn favorite-card__icon-btn--danger"
-                      (click)="onRemoveCity(city, $event)"
-                      [attr.aria-label]="'Quitar ' + city.name + ' de favoritos'"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" class="favorite-card__action-icon" aria-hidden="true">
-                        <path d="M5 7h14M10 7V5.5A1.5 1.5 0 0111.5 4h1A1.5 1.5 0 0114 5.5V7m-5 0h6m-7 0l.5 12.5A1.5 1.5 0 0010 21h4a1.5 1.5 0 001.5-1.5L16 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </article>
+              <app-favorites-city-card
+                [city]="city"
+                [selected]="isSelected(city)"
+                [compared]="isCompared(city)"
+                (select)="onSelectCity(city)"
+                (toggleCompare)="onToggleCompare(city, $event)"
+                (moveUp)="onMoveCity(city, -1, $event)"
+                (moveDown)="onMoveCity(city, 1, $event)"
+                (remove)="onRemoveCity(city, $event)"
+              />
             }
           </div>
         } @else {
-          <div class="favorites-empty">
-            <div class="favorites-empty__icon-shell" aria-hidden="true">
-              <svg viewBox="0 0 64 64" fill="none" class="favorites-empty__icon">
-                <path d="M32 10C24.2 10 18 16.2 18 24c0 9 8.2 17.4 12.4 21.3a1.9 1.9 0 002.6 0C37.2 41.4 46 33 46 24c0-7.8-6.2-14-14-14Z" fill="currentColor" opacity="0.14"/>
-                <path d="M32 18a6 6 0 100 12 6 6 0 000-12Z" stroke="currentColor" stroke-width="2"/>
-                <path d="M14 47c5.6-4.7 12.7-7.5 18-7.5S42.4 42.3 50 47" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
-              </svg>
-            </div>
-            <p class="favorites-empty__title">No hay ciudades guardadas</p>
-            <p class="favorites-empty__body">Buscá una ciudad y agregala para empezar a armar tu lista.</p>
-            <div class="favorites-empty__actions">
-              <button mat-flat-button type="button" class="favorites-primary-btn" (click)="onAddCity()">
-                Buscar ciudad
-              </button>
-              <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="onRestoreDemo()">
-                Restaurar demo
-              </button>
-            </div>
-          </div>
+          <app-favorites-empty-state
+            (addCity)="onAddCity()"
+            (restoreDemo)="onRestoreDemo()"
+          />
         }
       </div>
 
       <aside class="favorites-panel">
-        @if (selectedCity(); as city) {
-          <section class="selected-card" aria-label="Detalle rápido de la ciudad seleccionada">
-            <div class="selected-card__header">
-              <div>
-                <p class="selected-card__eyebrow">Ciudad activa</p>
-                <h2 class="selected-card__title">{{ city.name }}, {{ city.country }}</h2>
-              </div>
-              <span class="status-chip" [class.status-chip--local]="city.syncState === 'local'" [class.status-chip--pending]="city.syncState === 'pending'" [class.status-chip--synced]="city.syncState === 'synced'">
-                {{ getSyncLabel(city.syncState) }}
-              </span>
-            </div>
-
-            <div class="selected-card__hero">
-              <div class="selected-card__icon-shell" [style.background]="city.accent">
-                <img [src]="city.icon" [alt]="city.conditionLabel" class="selected-card__icon" />
-              </div>
-
-              <div class="selected-card__temperature">
-                <div class="selected-card__temp-row">
-                  <span class="selected-card__temp font-display">{{ city.temp }}</span>
-                  <span class="selected-card__temp-unit font-display">°</span>
-                </div>
-                <p class="selected-card__condition">{{ city.conditionLabel }}</p>
-                <p class="selected-card__range">Sensación {{ city.feelsLike }}° · hace {{ city.updatedMinutesAgo }} min</p>
-              </div>
-            </div>
-
-            <div class="selected-card__metrics">
-              <div class="selected-card__metric">
-                <span class="selected-card__metric-label">Sensación</span>
-                <strong class="selected-card__metric-value font-mono">{{ city.feelsLike }}°</strong>
-              </div>
-
-              <div class="selected-card__metric">
-                <span class="selected-card__metric-label">Humedad</span>
-                <strong class="selected-card__metric-value font-mono">{{ city.humidity }}%</strong>
-              </div>
-
-              <div class="selected-card__metric">
-                <span class="selected-card__metric-label">Viento</span>
-                <strong class="selected-card__metric-value font-mono">{{ city.windSpeed }} km/h</strong>
-              </div>
-
-              <div class="selected-card__metric">
-                <span class="selected-card__metric-label">Rango</span>
-                <strong class="selected-card__metric-value font-mono">{{ city.min }}° / {{ city.max }}°</strong>
-              </div>
-            </div>
-
-            <div class="selected-card__actions">
-              <button mat-flat-button type="button" class="favorites-primary-btn" (click)="onOpenSelectedDetail()">
-                Ver detalle
-              </button>
-              <button mat-stroked-button type="button" class="favorites-secondary-btn" (click)="scrollToComparePanel()">
-                Ir a comparación
-              </button>
-            </div>
-          </section>
-        } @else {
-          <section class="selected-card selected-card--empty" aria-label="Sin ciudad seleccionada">
-            <p class="selected-card__eyebrow">Ciudad activa</p>
-            <h2 class="selected-card__title">Seleccioná una ciudad</h2>
-            <p class="selected-card__empty-copy">
-              Tocá cualquier ciudad de la lista para ver su resumen rápido acá.
-            </p>
-          </section>
-        }
+        <app-favorites-selected-card
+          [city]="selectedCity()"
+          (viewDetail)="onOpenSelectedDetail()"
+          (goToCompare)="scrollToComparePanel()"
+        />
       </aside>
     </section>
 
