@@ -1,0 +1,22 @@
+<header class="settings-header">
+  <button
+    mat-icon-button
+    type="button"
+    class="settings-back-btn"
+    aria-label="Volver"
+    (click)="onGoBack()"
+  >
+    <svg viewBox="0 0 24 24" fill="none" class="settings-back-icon" aria-hidden="true">
+      <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <div class="settings-header__copy">
+    <p class="settings-eyebrow">Preferencias</p>
+    <h1 class="settings-title">Ajustes</h1>
+  </div>
+
+  <span class="settings-version-badge" aria-label="Versión de la app">
+    v{{ appVersion() }}
+  </span>
+</header>

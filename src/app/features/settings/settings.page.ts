@@ -14,32 +14,27 @@ import { catchError, EMPTY } from 'rxjs';
 import { APP_ROUTE_PATHS } from '../../core/routing/app-route-paths';
 import { PreferencesService } from '../../core/services/preferences.service';
 import { UserPreferences } from '../../core/models/favorite.model';
+import { SettingsGroup, SettingsItem } from './settings.types';
 
-type ThemeMode = 'dark' | 'light';
-
-type SettingsItem = {
-  id: string;
-  label: string;
-  description: string;
-} & (
-  | { type: 'toggle'; value: boolean }
-  | { type: 'select'; value: string; options: { value: string; label: string }[] }
-  | { type: 'action'; actionLabel: string }
-);
-
-type SettingsGroup = {
-  id: string;
-  label: string;
-  icon: string;
-  items: SettingsItem[];
-};
+import { SettingsBackgroundComponent } from '../../components/settings/background/background.component';
+import { SettingsHeaderComponent } from '../../components/settings/header/header.component';
+import { SettingsGroupComponent } from '../../components/settings/settings-group/settings-group.component';
+import { SettingsFooterComponent } from '../../components/settings/footer/footer.component';
 
 const THEME_STORAGE_KEY = 'atmos.theme';
 
 @Component({
   selector: 'app-settings-page',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatSlideToggleModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatSlideToggleModule,
+    SettingsBackgroundComponent,
+    SettingsHeaderComponent,
+    SettingsGroupComponent,
+    SettingsFooterComponent
+  ],
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -48,7 +43,7 @@ export class SettingsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly preferencesService = inject(PreferencesService);
 
-  protected readonly themeMode = signal<ThemeMode>('dark');
+  protected readonly themeMode = signal<'dark' | 'light'>('dark');
   protected readonly isLoading = signal(true);
   protected readonly cachedCities = signal(5);
   protected readonly lastSyncLabel = signal('Hace 3 minutos');
@@ -76,7 +71,7 @@ export class SettingsPage implements OnInit {
     void this.router.navigate([`/${APP_ROUTE_PATHS.favorites}`]);
   }
 
-  protected onToggleChanged(_groupId: string, itemId: string, checked: boolean): void {
+  protected onToggleChanged(groupId: string, itemId: string, checked: boolean): void {
     const patch: Partial<UserPreferences> = {};
 
     switch (itemId) {
@@ -98,7 +93,7 @@ export class SettingsPage implements OnInit {
     }
   }
 
-  protected onSelectChanged(_groupId: string, itemId: string, value: string): void {
+  protected onSelectChanged(groupId: string, itemId: string, value: string): void {
     const patch: Partial<UserPreferences> = {};
 
     switch (itemId) {
@@ -126,7 +121,7 @@ export class SettingsPage implements OnInit {
     }
   }
 
-  protected onActionTriggered(_groupId: string, itemId: string): void {
+  protected onActionClicked(groupId: string, itemId: string): void {
     switch (itemId) {
       case 'force-sync':
         this.lastSyncLabel.set('Ahora mismo');
@@ -137,26 +132,6 @@ export class SettingsPage implements OnInit {
     }
 
     this.buildGroups();
-  }
-
-  protected trackByGroup(_index: number, group: SettingsGroup): string {
-    return group.id;
-  }
-
-  protected trackByItem(_index: number, item: SettingsItem): string {
-    return item.id;
-  }
-
-  protected isToggle(item: SettingsItem): item is SettingsItem & { type: 'toggle'; value: boolean } {
-    return item.type === 'toggle';
-  }
-
-  protected isSelect(item: SettingsItem): item is SettingsItem & { type: 'select'; value: string; options: { value: string; label: string }[] } {
-    return item.type === 'select';
-  }
-
-  protected isAction(item: SettingsItem): item is SettingsItem & { type: 'action'; actionLabel: string } {
-    return item.type === 'action';
   }
 
   private buildGroups(): void {

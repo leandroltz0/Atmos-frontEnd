@@ -1,0 +1,43 @@
+.settings-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.settings-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+}
+
+.settings-bg__orb--1 {
+  width: 55vw;
+  height: 55vw;
+  max-width: 440px;
+  max-height: 440px;
+  top: -10%;
+  left: -8%;
+  background: radial-gradient(circle, rgba(58, 134, 255, 0.14) 0%, transparent 72%);
+}
+
+.settings-bg__orb--2 {
+  width: 40vw;
+  height: 40vw;
+  max-width: 320px;
+  max-height: 320px;
+  bottom: 8%;
+  right: -6%;
+  background: radial-gradient(circle, rgba(72, 202, 228, 0.10) 0%, transparent 72%);
+}
+
+.settings-bg__orb--3 {
+  width: 24vw;
+  height: 24vw;
+  max-width: 200px;
+  max-height: 200px;
+  top: 55%;
+  left: 45%;
+  background: radial-gradient(circle, rgba(255, 209, 102, 0.09) 0%, transparent 72%);
+}
