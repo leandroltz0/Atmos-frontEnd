@@ -1,0 +1,21 @@
+.profile-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.profile-footer__text {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.01em;
+}
+
+.profile-footer__sub {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(139, 174, 200, 0.6);
+}

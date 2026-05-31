@@ -5,6 +5,7 @@ import {
   Component,
   OnInit,
   signal,
+  computed,
   inject,
   TemplateRef,
   ViewChild
@@ -26,22 +27,14 @@ import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { PublicUser } from '../../core/models/favorite.model';
+import { ProfileStat, ProfileAction } from './profile.types';
 
-type ProfileStat = {
-  id: string;
-  label: string;
-  value: number;
-  icon: string;
-  tone: 'accent' | 'info' | 'sun';
-};
-
-type ProfileAction = {
-  id: string;
-  label: string;
-  description: string;
-  icon: string;
-  tone: 'default' | 'danger';
-};
+import { ProfileBackgroundComponent } from '../../components/profile/background/background.component';
+import { ProfileHeaderComponent } from '../../components/profile/header/header.component';
+import { ProfileHeroSectionComponent } from '../../components/profile/hero-section/hero-section.component';
+import { ProfileStatsGridComponent } from '../../components/profile/stats-grid/stats-grid.component';
+import { ProfileActionGroupComponent } from '../../components/profile/action-group/action-group.component';
+import { ProfileFooterComponent } from '../../components/profile/footer/footer.component';
 
 const INITIAL_STATS: ProfileStat[] = [
   { id: 'favorites', label: 'Favoritas', value: 0, icon: 'heart', tone: 'accent' },
@@ -61,7 +54,13 @@ const INITIAL_STATS: ProfileStat[] = [
     MatFormFieldModule,
     MatInputModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    ProfileBackgroundComponent,
+    ProfileHeaderComponent,
+    ProfileHeroSectionComponent,
+    ProfileStatsGridComponent,
+    ProfileActionGroupComponent,
+    ProfileFooterComponent
   ],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',
@@ -83,6 +82,14 @@ export class ProfilePage implements OnInit {
     name: '',
     email: '',
     memberSince: ''
+  });
+  protected readonly initials = computed(() => {
+    const name = this.user().name;
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
   });
   protected readonly stats = signal<ProfileStat[]>([...INITIAL_STATS]);
   protected readonly isEditingName = signal(false);
@@ -140,15 +147,6 @@ export class ProfilePage implements OnInit {
     this.loadProfile();
   }
 
-  protected getUserInitials(): string {
-    const name = this.user().name;
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  }
-
   protected onGoBack(): void {
     void this.router.navigate([`/${APP_ROUTE_PATHS.settings}`]);
   }
@@ -200,6 +198,10 @@ export class ProfilePage implements OnInit {
 
   protected onCancelEditName(): void {
     this.isEditingName.set(false);
+  }
+
+  protected onEditNameChange(value: string): void {
+    this.editNameValue.set(value);
   }
 
   protected onActionTriggered(actionId: string): void {
@@ -310,14 +312,6 @@ export class ProfilePage implements OnInit {
     this.dialog.closeAll();
     this.deletePassword.set('');
     this.deleteError.set('');
-  }
-
-  protected trackByStat(_index: number, stat: ProfileStat): string {
-    return stat.id;
-  }
-
-  protected trackByAction(_index: number, action: ProfileAction): string {
-    return action.id;
   }
 
   private openLogoutDialog(): void {

@@ -1,0 +1,43 @@
+<section class="profile-group" [attr.aria-label]="label()">
+  <div class="profile-group__header">
+    <div
+      class="profile-group__icon-shell"
+      [class.profile-group__icon-shell--session]="iconVariant() === 'session'"
+    >
+      <mat-icon class="profile-group__icon">{{ icon() }}</mat-icon>
+    </div>
+    <h2 class="profile-group__label">{{ label() }}</h2>
+  </div>
+
+  <div class="profile-group__items">
+    @for (action of actions(); track action.id) {
+      <div
+        class="profile-item"
+        [class.profile-item--danger]="action.tone === 'danger'"
+        matRipple
+        (click)="onAction(action.id)"
+        (keydown.enter)="onAction(action.id)"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="action.label"
+      >
+        <div
+          class="profile-item__leading"
+          [class.profile-item__leading--danger]="action.tone === 'danger'"
+        >
+          <mat-icon class="profile-item__icon">{{ action.icon }}</mat-icon>
+        </div>
+        <div class="profile-item__content">
+          <span
+            class="profile-item__label"
+            [class.profile-item__label--danger]="action.tone === 'danger'"
+          >
+            {{ action.label }}
+          </span>
+          <span class="profile-item__description">{{ action.description }}</span>
+        </div>
+        <mat-icon class="profile-item__chevron">chevron_right</mat-icon>
+      </div>
+    }
+  </div>
+</section>

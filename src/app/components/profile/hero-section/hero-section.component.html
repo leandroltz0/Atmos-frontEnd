@@ -1,0 +1,60 @@
+<section class="profile-hero" aria-label="Información de usuario">
+  <div class="profile-hero__avatar-wrapper">
+    <button
+      type="button"
+      class="profile-avatar"
+      matRipple
+      [matRippleCentered]="true"
+      (click)="onAvatarClick()"
+      aria-label="Cambiar foto de perfil"
+    >
+      <span class="profile-avatar__initials">{{ initials() }}</span>
+
+      <span class="profile-avatar__camera-badge" aria-hidden="true">
+        <mat-icon class="profile-avatar__camera-icon">photo_camera</mat-icon>
+      </span>
+    </button>
+  </div>
+
+  <div class="profile-hero__info">
+    @if (isEditingName()) {
+      <div class="profile-hero__edit-name">
+        <mat-form-field appearance="outline" class="profile-name-field">
+          <mat-label>Nombre</mat-label>
+          <input
+            matInput
+            [value]="editNameValue()"
+            (input)="onEditNameInput($any($event.target).value)"
+            (keydown.enter)="onSaveName()"
+            (keydown.escape)="onCancelEdit()"
+            maxlength="40"
+            autofocus
+            aria-label="Editar nombre de usuario"
+          />
+        </mat-form-field>
+        <div class="profile-hero__edit-actions">
+          <button mat-button class="profile-edit-cancel" (click)="onCancelEdit()">
+            Cancelar
+          </button>
+          <button mat-flat-button class="profile-edit-save" (click)="onSaveName()">
+            Guardar
+          </button>
+        </div>
+      </div>
+    } @else {
+      <h2 class="profile-hero__name">{{ userName() }}</h2>
+    }
+
+    <p class="profile-hero__email">
+      <mat-icon class="profile-hero__email-icon">mail_outline</mat-icon>
+      {{ email() }}
+    </p>
+
+    <div class="profile-hero__meta">
+      <span class="profile-member-badge">
+        <mat-icon class="profile-member-badge__icon">event</mat-icon>
+        Desde {{ memberSince() }}
+      </span>
+    </div>
+  </div>
+</section>

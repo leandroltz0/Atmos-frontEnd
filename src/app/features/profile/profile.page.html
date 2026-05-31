@@ -1,200 +1,46 @@
 <main class="profile-shell font-body" role="main" [attr.aria-busy]="false">
-  <!-- ─── Background Orbs ─── -->
-  <div class="profile-bg" aria-hidden="true">
-    <div class="profile-bg__orb profile-bg__orb--1"></div>
-    <div class="profile-bg__orb profile-bg__orb--2"></div>
-    <div class="profile-bg__orb profile-bg__orb--3"></div>
-  </div>
+  <app-profile-background />
 
   <div class="profile-container">
-    <!-- ─── Header ─── -->
-    <header class="profile-header">
-      <button
-        mat-icon-button
-        type="button"
-        class="profile-back-btn"
-        aria-label="Volver a ajustes"
-        (click)="onGoBack()"
-      >
-        <mat-icon>arrow_back</mat-icon>
-      </button>
+    <app-profile-header
+      [appVersion]="appVersion()"
+      (goBack)="onGoBack()"
+    />
 
-      <div class="profile-header__copy">
-        <p class="profile-eyebrow">Tu cuenta</p>
-        <h1 class="profile-title">Perfil</h1>
-      </div>
+    <app-profile-hero-section
+      [initials]="initials()"
+      [userName]="user().name"
+      [email]="user().email"
+      [memberSince]="user().memberSince"
+      [isEditingName]="isEditingName()"
+      [editNameValue]="editNameValue()"
+      [isSavingName]="isSavingName()"
+      (avatarClick)="onAvatarClick()"
+      (startEdit)="onStartEditName()"
+      (saveName)="onSaveName()"
+      (cancelEdit)="onCancelEditName()"
+      (editNameChange)="onEditNameChange($event)"
+    />
 
-      <span class="profile-version-badge" aria-label="Versión de la app">
-        v{{ appVersion() }}
-      </span>
-    </header>
+    <app-profile-stats-grid [stats]="stats()" />
 
-    <!-- ─── Hero: Avatar + Identity ─── -->
-    <section class="profile-hero" aria-label="Información de usuario">
-      <div class="profile-hero__avatar-wrapper">
-        <button
-          type="button"
-          class="profile-avatar"
-          matRipple
-          [matRippleCentered]="true"
-          (click)="onAvatarClick()"
-          aria-label="Cambiar foto de perfil"
-        >
-          <span class="profile-avatar__initials">{{ getUserInitials() }}</span>
+    <app-profile-action-group
+      label="Cuenta"
+      icon="person"
+      iconVariant="default"
+      [actions]="accountActions"
+      (actionTriggered)="onActionTriggered($event)"
+    />
 
-          <span class="profile-avatar__camera-badge" aria-hidden="true">
-            <mat-icon class="profile-avatar__camera-icon">photo_camera</mat-icon>
-          </span>
-        </button>
-      </div>
+    <app-profile-action-group
+      label="Sesión"
+      icon="security"
+      iconVariant="session"
+      [actions]="sessionActions"
+      (actionTriggered)="onActionTriggered($event)"
+    />
 
-      <div class="profile-hero__info">
-        @if (isEditingName()) {
-          <div class="profile-hero__edit-name">
-            <mat-form-field appearance="outline" class="profile-name-field">
-              <mat-label>Nombre</mat-label>
-              <input
-                matInput
-                [value]="editNameValue()"
-                (input)="editNameValue.set($any($event.target).value)"
-                (keydown.enter)="onSaveName()"
-                (keydown.escape)="onCancelEditName()"
-                maxlength="40"
-                autofocus
-                aria-label="Editar nombre de usuario"
-              />
-            </mat-form-field>
-            <div class="profile-hero__edit-actions">
-              <button mat-button class="profile-edit-cancel" (click)="onCancelEditName()">
-                Cancelar
-              </button>
-              <button mat-flat-button class="profile-edit-save" (click)="onSaveName()">
-                Guardar
-              </button>
-            </div>
-          </div>
-        } @else {
-          <h2 class="profile-hero__name">{{ user().name }}</h2>
-        }
-
-        <p class="profile-hero__email">
-          <mat-icon class="profile-hero__email-icon">mail_outline</mat-icon>
-          {{ user().email }}
-        </p>
-
-        <div class="profile-hero__meta">
-          <span class="profile-member-badge">
-            <mat-icon class="profile-member-badge__icon">event</mat-icon>
-            Desde {{ user().memberSince }}
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Stats ─── -->
-    <section class="profile-stats" aria-label="Estadísticas de uso">
-      @for (stat of stats(); track stat.id) {
-        <div class="profile-stat" [class]="'profile-stat--' + stat.tone">
-          <div class="profile-stat__icon-wrap" [class]="'profile-stat__icon-wrap--' + stat.tone">
-            @switch (stat.icon) {
-              @case ('heart') {
-                <svg viewBox="0 0 24 24" fill="none" class="profile-stat__svg" aria-hidden="true">
-                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              }
-              @case ('bell') {
-                <svg viewBox="0 0 24 24" fill="none" class="profile-stat__svg" aria-hidden="true">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              }
-              @case ('activity') {
-                <svg viewBox="0 0 24 24" fill="none" class="profile-stat__svg" aria-hidden="true">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              }
-            }
-          </div>
-          <span class="profile-stat__value font-mono">{{ stat.value }}</span>
-          <span class="profile-stat__label">{{ stat.label }}</span>
-        </div>
-      }
-    </section>
-
-    <!-- ─── Account Group ─── -->
-    <section class="profile-group" aria-label="Cuenta">
-      <div class="profile-group__header">
-        <div class="profile-group__icon-shell">
-          <mat-icon class="profile-group__icon">person</mat-icon>
-        </div>
-        <h2 class="profile-group__label">Cuenta</h2>
-      </div>
-
-      <div class="profile-group__items">
-        @for (action of accountActions; track action.id) {
-          <div
-            class="profile-item"
-            matRipple
-            (click)="onActionTriggered(action.id)"
-            (keydown.enter)="onActionTriggered(action.id)"
-            tabindex="0"
-            role="button"
-            [attr.aria-label]="action.label"
-          >
-            <div class="profile-item__leading">
-              <mat-icon class="profile-item__icon">{{ action.icon }}</mat-icon>
-            </div>
-            <div class="profile-item__content">
-              <span class="profile-item__label">{{ action.label }}</span>
-              <span class="profile-item__description">{{ action.description }}</span>
-            </div>
-            <mat-icon class="profile-item__chevron">chevron_right</mat-icon>
-          </div>
-        }
-      </div>
-    </section>
-
-    <!-- ─── Session Group ─── -->
-    <section class="profile-group" aria-label="Sesión">
-      <div class="profile-group__header">
-        <div class="profile-group__icon-shell profile-group__icon-shell--session">
-          <mat-icon class="profile-group__icon">security</mat-icon>
-        </div>
-        <h2 class="profile-group__label">Sesión</h2>
-      </div>
-
-      <div class="profile-group__items">
-        @for (action of sessionActions; track action.id) {
-          <div
-            class="profile-item"
-            [class.profile-item--danger]="action.tone === 'danger'"
-            matRipple
-            (click)="onActionTriggered(action.id)"
-            (keydown.enter)="onActionTriggered(action.id)"
-            tabindex="0"
-            role="button"
-            [attr.aria-label]="action.label"
-          >
-            <div class="profile-item__leading" [class.profile-item__leading--danger]="action.tone === 'danger'">
-              <mat-icon class="profile-item__icon">{{ action.icon }}</mat-icon>
-            </div>
-            <div class="profile-item__content">
-              <span class="profile-item__label" [class.profile-item__label--danger]="action.tone === 'danger'">
-                {{ action.label }}
-              </span>
-              <span class="profile-item__description">{{ action.description }}</span>
-            </div>
-            <mat-icon class="profile-item__chevron">chevron_right</mat-icon>
-          </div>
-        }
-      </div>
-    </section>
-
-    <!-- ─── Footer ─── -->
-    <footer class="profile-footer">
-      <p class="profile-footer__text">ATMOS Weather App · v{{ appVersion() }}</p>
-      <p class="profile-footer__sub">Datos de Open-Meteo · Sin conexión a la nube</p>
-    </footer>
+    <app-profile-footer [appVersion]="appVersion()" />
   </div>
 
   <!-- ─── Logout Confirmation Dialog ─── -->

@@ -1,0 +1,20 @@
+<header class="profile-header">
+  <button
+    mat-icon-button
+    type="button"
+    class="profile-back-btn"
+    aria-label="Volver a ajustes"
+    (click)="onGoBack()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <div class="profile-header__copy">
+    <p class="profile-eyebrow">Tu cuenta</p>
+    <h1 class="profile-title">Perfil</h1>
+  </div>
+
+  <span class="profile-version-badge" aria-label="Versión de la app">
+    v{{ appVersion() }}
+  </span>
+</header>
