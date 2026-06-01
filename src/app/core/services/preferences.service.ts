@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { AuthService } from './auth.service';
 import { UserPreferences } from '../models/favorite.model';
+import { environment } from '../../../environments/environment';
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   tempUnit: 'celsius',
@@ -21,7 +22,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 export class PreferencesService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly baseUrl = 'http://localhost:5008';
+  private readonly baseUrl = environment.apiBaseUrl;
 
   readonly preferences = signal<UserPreferences>(DEFAULT_PREFERENCES);
 

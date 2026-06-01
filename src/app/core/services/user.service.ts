@@ -5,12 +5,13 @@ import { map } from 'rxjs/operators';
 
 import { AuthService } from './auth.service';
 import { PublicUser } from '../models/favorite.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly baseUrl = 'http://localhost:5008';
+  private readonly baseUrl = environment.apiBaseUrl;
 
   private getHeaders(): HttpHeaders {
     const token = this.auth.getToken();

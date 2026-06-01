@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface CityItem {
   id: string;
@@ -32,6 +33,7 @@ const INITIAL_STATE: CitySearchState = {
 @Injectable({ providedIn: 'root' })
 export class CitiesService {
   private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiBaseUrl;
 
   search(query: string): Observable<CitySearchState> {
     const value = query.trim();
@@ -42,7 +44,7 @@ export class CitiesService {
 
     const params = new HttpParams().set('q', value);
 
-    return this.http.get<CitiesResponse>('/cities/search', { params }).pipe(
+    return this.http.get<CitiesResponse>(`${this.apiUrl}/cities/search`, { params }).pipe(
       map(response => ({
         cities: response.cities.slice(0, 8),
         loading: false,
